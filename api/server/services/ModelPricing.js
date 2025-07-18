@@ -161,6 +161,459 @@ const PRICING_DATA = {
     },
   ],
 
+  // Additional OpenAI Models
+  'gpt-4.5-preview': [
+    {
+      effectiveFrom: new Date('2025-02-27'),
+      prompt: 10.0,
+      completion: 30.0,
+    },
+  ],
+  'gpt-4.5-preview-2025-02-27': [
+    {
+      effectiveFrom: new Date('2025-02-27'),
+      prompt: 10.0,
+      completion: 30.0,
+    },
+  ],
+  'gpt-4-vision-preview': [
+    {
+      effectiveFrom: new Date('2023-11-06'),
+      prompt: 10.0,
+      completion: 30.0,
+    },
+  ],
+  'gpt-4-turbo-preview': [
+    {
+      effectiveFrom: new Date('2024-01-25'),
+      prompt: 10.0,
+      completion: 30.0,
+    },
+  ],
+  'gpt-4-1106-preview': [
+    {
+      effectiveFrom: new Date('2023-11-06'),
+      prompt: 10.0,
+      completion: 30.0,
+    },
+  ],
+  'gpt-4-0125-preview': [
+    {
+      effectiveFrom: new Date('2024-01-25'),
+      prompt: 10.0,
+      completion: 30.0,
+    },
+  ],
+  'gpt-3.5-turbo-0125': [
+    {
+      effectiveFrom: new Date('2024-01-25'),
+      prompt: 0.5,
+      completion: 1.5,
+    },
+  ],
+  'gpt-3.5-turbo-1106': [
+    {
+      effectiveFrom: new Date('2023-11-06'),
+      prompt: 1.0,
+      completion: 2.0,
+    },
+  ],
+  'gpt-3.5-turbo-16k': [
+    {
+      effectiveFrom: new Date('2023-06-13'),
+      prompt: 3.0,
+      completion: 4.0,
+    },
+  ],
+  'gpt-3.5-turbo-instruct': [
+    {
+      effectiveFrom: new Date('2023-09-14'),
+      prompt: 1.5,
+      completion: 2.0,
+    },
+  ],
+  'chatgpt-4o-latest': [
+    {
+      effectiveFrom: new Date('2024-05-13'),
+      prompt: 5.0,
+      completion: 15.0,
+    },
+  ],
+  'gpt-4o-2024-05-13': [
+    {
+      effectiveFrom: new Date('2024-05-13'),
+      prompt: 5.0,
+      completion: 15.0,
+    },
+  ],
+  'gpt-4o-2024-08-06': [
+    {
+      effectiveFrom: new Date('2024-08-06'),
+      prompt: 2.5,
+      completion: 10.0,
+    },
+  ],
+
+  // Additional Anthropic Models
+  'claude-opus-4-20250514': [
+    {
+      effectiveFrom: new Date('2025-05-14'),
+      prompt: 15.0,
+      completion: 75.0,
+    },
+  ],
+  'claude-opus-4-latest': [
+    {
+      effectiveFrom: new Date('2025-05-14'),
+      prompt: 15.0,
+      completion: 75.0,
+    },
+  ],
+  'claude-sonnet-4-20250514': [
+    {
+      effectiveFrom: new Date('2025-05-14'),
+      prompt: 3.0,
+      completion: 15.0,
+    },
+  ],
+  'claude-sonnet-4-latest': [
+    {
+      effectiveFrom: new Date('2025-05-14'),
+      prompt: 3.0,
+      completion: 15.0,
+    },
+  ],
+  'claude-3-7-sonnet-latest': [
+    {
+      effectiveFrom: new Date('2025-02-19'),
+      prompt: 1.5,
+      completion: 7.5,
+    },
+  ],
+  'claude-3-7-sonnet-20250219': [
+    {
+      effectiveFrom: new Date('2025-02-19'),
+      prompt: 1.5,
+      completion: 7.5,
+    },
+  ],
+  'claude-3-5-sonnet-20240620': [
+    {
+      effectiveFrom: new Date('2024-06-20'),
+      prompt: 3.0,
+      completion: 15.0,
+      cacheWrite: 3.75,
+      cacheRead: 0.3,
+    },
+  ],
+  'claude-3-5-sonnet-20241022': [
+    {
+      effectiveFrom: new Date('2024-10-22'),
+      prompt: 3.0,
+      completion: 15.0,
+      cacheWrite: 3.75,
+      cacheRead: 0.3,
+    },
+  ],
+  'claude-2.1': [
+    {
+      effectiveFrom: new Date('2023-11-21'),
+      prompt: 8.0,
+      completion: 24.0,
+    },
+  ],
+  'claude-2': [
+    {
+      effectiveFrom: new Date('2023-07-11'),
+      prompt: 8.0,
+      completion: 24.0,
+    },
+  ],
+  'claude-instant-1': [
+    {
+      effectiveFrom: new Date('2023-03-14'),
+      prompt: 0.8,
+      completion: 2.4,
+    },
+  ],
+
+  // Additional Google Models
+  'gemini-2.0-flash-001': [
+    {
+      effectiveFrom: new Date('2024-12-11'),
+      prompt: 0.15,
+      completion: 0.6,
+    },
+  ],
+  'gemini-2.0-flash-exp': [
+    {
+      effectiveFrom: new Date('2024-12-11'),
+      prompt: 0.0,  // Free during experimental phase
+      completion: 0.0,
+    },
+  ],
+  'gemini-2.0-flash-lite': [
+    {
+      effectiveFrom: new Date('2024-12-11'),
+      prompt: 0.075,
+      completion: 0.3,
+    },
+  ],
+  'gemini-2.0-pro-exp-02-05': [
+    {
+      effectiveFrom: new Date('2025-02-05'),
+      prompt: 0.0,  // Free during experimental phase
+      completion: 0.0,
+    },
+  ],
+  'gemini-1.5-flash-001': [
+    {
+      effectiveFrom: new Date('2024-05-14'),
+      prompt: 0.15,
+      completion: 0.6,
+    },
+  ],
+  'gemini-1.5-flash-002': [
+    {
+      effectiveFrom: new Date('2024-09-24'),
+      prompt: 0.15,
+      completion: 0.6,
+    },
+  ],
+  'gemini-1.5-pro-001': [
+    {
+      effectiveFrom: new Date('2024-02-15'),
+      prompt: 2.5,
+      completion: 10.0,
+    },
+  ],
+  'gemini-1.5-pro-002': [
+    {
+      effectiveFrom: new Date('2024-09-24'),
+      prompt: 1.25,
+      completion: 5.0,
+    },
+  ],
+  'gemini-1.0-pro-001': [
+    {
+      effectiveFrom: new Date('2023-12-06'),
+      prompt: 0.5,
+      completion: 1.5,
+    },
+  ],
+
+  // AWS Bedrock Models (using same pricing as direct API)
+  'anthropic.claude-3-5-sonnet-20241022-v2:0': [
+    {
+      effectiveFrom: new Date('2024-10-22'),
+      prompt: 3.0,
+      completion: 15.0,
+    },
+  ],
+  'anthropic.claude-3-5-sonnet-20240620-v1:0': [
+    {
+      effectiveFrom: new Date('2024-06-20'),
+      prompt: 3.0,
+      completion: 15.0,
+    },
+  ],
+  'anthropic.claude-3-5-haiku-20241022-v1:0': [
+    {
+      effectiveFrom: new Date('2024-11-01'),
+      prompt: 0.8,
+      completion: 4.0,
+    },
+  ],
+  'anthropic.claude-3-opus-20240229-v1:0': [
+    {
+      effectiveFrom: new Date('2024-03-04'),
+      prompt: 15.0,
+      completion: 75.0,
+    },
+  ],
+  'anthropic.claude-3-sonnet-20240229-v1:0': [
+    {
+      effectiveFrom: new Date('2024-03-04'),
+      prompt: 3.0,
+      completion: 15.0,
+    },
+  ],
+  'anthropic.claude-3-haiku-20240307-v1:0': [
+    {
+      effectiveFrom: new Date('2024-03-07'),
+      prompt: 0.25,
+      completion: 1.25,
+    },
+  ],
+
+  // Cohere Models (via Bedrock)
+  'cohere.command-r-v1:0': [
+    {
+      effectiveFrom: new Date('2024-03-01'),
+      prompt: 0.5,
+      completion: 1.5,
+    },
+  ],
+  'cohere.command-r-plus-v1:0': [
+    {
+      effectiveFrom: new Date('2024-04-01'),
+      prompt: 3.0,
+      completion: 15.0,
+    },
+  ],
+
+  // Meta Llama Models (via Bedrock)
+  'meta.llama2-13b-chat-v1': [
+    {
+      effectiveFrom: new Date('2023-07-01'),
+      prompt: 0.75,
+      completion: 1.0,
+    },
+  ],
+  'meta.llama2-70b-chat-v1': [
+    {
+      effectiveFrom: new Date('2023-07-01'),
+      prompt: 1.95,
+      completion: 2.56,
+    },
+  ],
+  'meta.llama3-8b-instruct-v1:0': [
+    {
+      effectiveFrom: new Date('2024-04-18'),
+      prompt: 0.3,
+      completion: 0.6,
+    },
+  ],
+  'meta.llama3-70b-instruct-v1:0': [
+    {
+      effectiveFrom: new Date('2024-04-18'),
+      prompt: 2.65,
+      completion: 3.5,
+    },
+  ],
+  'meta.llama3-1-8b-instruct-v1:0': [
+    {
+      effectiveFrom: new Date('2024-07-23'),
+      prompt: 0.22,
+      completion: 0.22,
+    },
+  ],
+  'meta.llama3-1-70b-instruct-v1:0': [
+    {
+      effectiveFrom: new Date('2024-07-23'),
+      prompt: 0.99,
+      completion: 0.99,
+    },
+  ],
+  'meta.llama3-1-405b-instruct-v1:0': [
+    {
+      effectiveFrom: new Date('2024-07-23'),
+      prompt: 5.32,
+      completion: 16.0,
+    },
+  ],
+
+  // Mistral Models (via Bedrock and direct)
+  'mistral.mistral-7b-instruct-v0:2': [
+    {
+      effectiveFrom: new Date('2023-09-27'),
+      prompt: 0.15,
+      completion: 0.2,
+    },
+  ],
+  'mistral.mixtral-8x7b-instruct-v0:1': [
+    {
+      effectiveFrom: new Date('2023-12-11'),
+      prompt: 0.45,
+      completion: 0.7,
+    },
+  ],
+  'mistral.mistral-large-2402-v1:0': [
+    {
+      effectiveFrom: new Date('2024-02-26'),
+      prompt: 4.0,
+      completion: 12.0,
+    },
+  ],
+  'mistral.mistral-large-2407-v1:0': [
+    {
+      effectiveFrom: new Date('2024-07-24'),
+      prompt: 2.0,
+      completion: 6.0,
+    },
+  ],
+  'mistral.mistral-small-2410-v1:0': [
+    {
+      effectiveFrom: new Date('2024-10-01'),
+      prompt: 0.2,
+      completion: 0.6,
+    },
+  ],
+
+  // AI21 Models (via Bedrock)
+  'ai21.jamba-instruct-v1:0': [
+    {
+      effectiveFrom: new Date('2024-03-01'),
+      prompt: 0.5,
+      completion: 0.7,
+    },
+  ],
+
+  // Amazon Titan Models
+  'amazon.titan-text-lite-v1': [
+    {
+      effectiveFrom: new Date('2023-11-29'),
+      prompt: 0.3,
+      completion: 0.4,
+    },
+  ],
+  'amazon.titan-text-express-v1': [
+    {
+      effectiveFrom: new Date('2023-11-29'),
+      prompt: 0.8,
+      completion: 1.1,
+    },
+  ],
+  'amazon.titan-text-premier-v1:0': [
+    {
+      effectiveFrom: new Date('2024-05-01'),
+      prompt: 5.0,
+      completion: 15.0,
+    },
+  ],
+
+  // xAI Models
+  'grok-2': [
+    {
+      effectiveFrom: new Date('2024-08-01'),
+      prompt: 5.0,
+      completion: 10.0,
+    },
+  ],
+  'grok-2-mini': [
+    {
+      effectiveFrom: new Date('2024-08-01'),
+      prompt: 2.0,
+      completion: 6.0,
+    },
+  ],
+
+  // DeepSeek Models
+  'deepseek-chat': [
+    {
+      effectiveFrom: new Date('2024-05-01'),
+      prompt: 0.14,
+      completion: 0.28,
+    },
+  ],
+  'deepseek-coder': [
+    {
+      effectiveFrom: new Date('2024-05-01'),
+      prompt: 0.14,
+      completion: 0.28,
+    },
+  ],
+
   // Add more models as needed
 };
 
@@ -263,10 +716,10 @@ function getSupportedModels() {
  * @returns {string} Provider name
  */
 function getModelProvider(model) {
-  if (model.includes('gpt') || model.includes('o1')) {
+  if (model.includes('gpt') || model.includes('o1') || model.includes('chatgpt')) {
     return 'OpenAI';
   }
-  if (model.includes('claude')) {
+  if (model.includes('claude') || model.startsWith('anthropic.')) {
     return 'Anthropic';
   }
   if (model.includes('gemini')) {
@@ -275,8 +728,23 @@ function getModelProvider(model) {
   if (model.includes('mistral')) {
     return 'Mistral';
   }
-  if (model.includes('command')) {
+  if (model.includes('command') || model.startsWith('cohere.')) {
     return 'Cohere';
+  }
+  if (model.includes('llama') || model.startsWith('meta.')) {
+    return 'Meta';
+  }
+  if (model.includes('titan') || model.startsWith('amazon.')) {
+    return 'Amazon';
+  }
+  if (model.includes('grok')) {
+    return 'xAI';
+  }
+  if (model.includes('deepseek')) {
+    return 'DeepSeek';
+  }
+  if (model.startsWith('ai21.')) {
+    return 'AI21';
   }
   return 'Unknown';
 }
