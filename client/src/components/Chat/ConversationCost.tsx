@@ -10,7 +10,8 @@ import store from '~/store';
 export default function ConversationCost() {
   const { conversationId } = useParams();
   const localize = useLocalize();
-  const messages = useRecoilValue(store.messages);
+  // Use latestMessageFamily to detect new messages
+  const latestMessage = useRecoilValue(store.latestMessageFamily(0));
   
   const { data: costData, isLoading, error, refetch } = useConversationCost(
     conversationId !== Constants.NEW_CONVO ? conversationId : undefined,
@@ -20,9 +21,9 @@ export default function ConversationCost() {
     },
   );
 
-  // Refetch when messages change (new message added)
+  // Refetch when new message is added
   useEffect(() => {
-    if (conversationId && conversationId !== Constants.NEW_CONVO && messages.length > 0) {
+    if (conversationId && conversationId !== Constants.NEW_CONVO && latestMessage) {
       // Debounce to avoid too many requests
       const timeoutId = setTimeout(() => {
         refetch();
@@ -30,7 +31,7 @@ export default function ConversationCost() {
       
       return () => clearTimeout(timeoutId);
     }
-  }, [messages.length, conversationId, refetch]);
+  }, [latestMessage?.messageId, conversationId, refetch]);
 
   // Don't show for new conversations
   if (!conversationId || conversationId === Constants.NEW_CONVO) {
