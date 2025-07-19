@@ -62,12 +62,15 @@ export const useConversationCost = (
 
       try {
         const response = await request.get(`/api/convos/${conversationId}/cost`);
-        return response.data;
+        // Ensure we always return a value, never undefined
+        return response.data || null;
       } catch (error: any) {
         if (error.response?.status === 404) {
           return null; // No cost data available
         }
-        throw error;
+        // For other errors, return null instead of throwing
+        console.error('Cost fetch error:', error);
+        return null;
       }
     },
     {

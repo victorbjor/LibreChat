@@ -17,19 +17,13 @@ export default function ConversationCost() {
     conversationId !== Constants.NEW_CONVO ? conversationId : undefined,
     {
       refetchOnWindowFocus: false,
-      retry: 2,
+      retry: false, // Disable retries to avoid error spam
+      onError: (err) => {
+        console.error('Cost query error:', err);
+      },
     },
   );
 
-  // Debug logging
-  console.log('ConversationCost Debug:', {
-    conversationId,
-    isNewConvo: conversationId === Constants.NEW_CONVO,
-    costData,
-    isLoading,
-    error: error?.message || error,
-    hasLatestMessage: !!latestMessage,
-  });
 
   // Refetch when new message is added
   useEffect(() => {
