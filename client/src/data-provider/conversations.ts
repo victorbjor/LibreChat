@@ -1,5 +1,5 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { QueryKeys, dataService } from 'librechat-data-provider';
+import { QueryKeys, request } from 'librechat-data-provider';
 import type { QueryObserverResult } from '@tanstack/react-query';
 
 export interface ConversationCostDisplay {
@@ -61,7 +61,8 @@ export const useConversationCost = (
       if (!conversationId) return null;
 
       try {
-        return await dataService.get(`/api/convos/${conversationId}/cost`);
+        const response = await request.get(`/api/convos/${conversationId}/cost`);
+        return response.data;
       } catch (error: any) {
         if (error.response?.status === 404) {
           return null; // No cost data available
@@ -91,7 +92,8 @@ export const useConversationCostDetail = (
       if (!conversationId) return null;
 
       try {
-        return await dataService.get(`/api/convos/${conversationId}/cost?detailed=true`);
+        const response = await request.get(`/api/convos/${conversationId}/cost?detailed=true`);
+        return response.data;
       } catch (error: any) {
         if (error.response?.status === 404) {
           return null; // No cost data available
@@ -121,9 +123,10 @@ export const useMultipleConversationCosts = (
       if (!conversationIds.length) return {};
 
       try {
-        return await dataService.post('/api/convos/costs', {
+        const response = await request.post('/api/convos/costs', {
           conversationIds,
         });
+        return response.data;
       } catch (error) {
         console.error('Error fetching multiple conversation costs:', error);
         return {};

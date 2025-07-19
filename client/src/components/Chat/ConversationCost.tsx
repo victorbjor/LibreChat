@@ -21,6 +21,16 @@ export default function ConversationCost() {
     },
   );
 
+  // Debug logging
+  console.log('ConversationCost Debug:', {
+    conversationId,
+    isNewConvo: conversationId === Constants.NEW_CONVO,
+    costData,
+    isLoading,
+    error: error?.message || error,
+    hasLatestMessage: !!latestMessage,
+  });
+
   // Refetch when new message is added
   useEffect(() => {
     if (conversationId && conversationId !== Constants.NEW_CONVO && latestMessage) {
@@ -38,19 +48,49 @@ export default function ConversationCost() {
     return null;
   }
 
-  // Show nothing while loading initially
-  if (isLoading && !costData) {
-    return null;
+  // Show a test indicator to verify component is rendering
+  if (!costData && !error && !isLoading) {
+    return (
+      <div className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-400">
+        <span>💰 --</span>
+      </div>
+    );
   }
 
-  // Don't show if error or no data (likely no transactions yet)
-  if (error || !costData) {
-    return null;
+  // Show loading indicator
+  if (isLoading && !costData) {
+    return (
+      <div className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-400">
+        <span>💰 ...</span>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-red-400">
+        <span>💰 err</span>
+      </div>
+    );
+  }
+
+  // Don't show if no cost data
+  if (!costData) {
+    return (
+      <div className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-400">
+        <span>💰 $0.00</span>
+      </div>
+    );
   }
 
   // Don't show if cost is effectively 0
   if (costData.totalCostRaw < 0.0001) {
-    return null;
+    return (
+      <div className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-400">
+        <span>💰 $0.00</span>
+      </div>
+    );
   }
 
   const tooltipText = `${localize('com_ui_conversation_cost')}: ${costData.totalCost}
