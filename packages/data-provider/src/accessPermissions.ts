@@ -42,6 +42,9 @@ export const ACCESS_ROLE_IDS = {
   AGENT_VIEWER: 'agent_viewer',
   AGENT_EDITOR: 'agent_editor',
   AGENT_OWNER: 'agent_owner', // Future use
+  PROMPT_VIEWER: 'prompt_viewer',
+  PROMPT_EDITOR: 'prompt_editor',
+  PROMPT_OWNER: 'prompt_owner',
 } as const;
 
 // ===== ZOD SCHEMAS =====
