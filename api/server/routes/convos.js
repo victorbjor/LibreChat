@@ -247,29 +247,30 @@ router.get('/:conversationId/cost', async (req, res) => {
     const { detailed = false } = req.query;
     const userId = req.user.id;
 
-    // TODO: Replace this with actual message fetching from LibreChat's message store
-    // For now, we'll return a mock response to test the frontend
-    const mockMessages = [
-      {
-        role: 'user',
-        model: 'gpt-4o-mini',
-        tokenCount: 150,
-        createdAt: new Date(),
-      },
-      {
-        role: 'assistant', 
-        model: 'gpt-4o-mini',
-        tokenCount: 200,
-        createdAt: new Date(),
-      }
-    ];
+    // Get the conversation with messages
+    const conversation = await getConvo(userId, conversationId);
+    
+    if (!conversation) {
+      return res.status(404).json({
+        error: 'Conversation not found',
+      });
+    }
 
-    // Calculate cost from messages
-    const costDisplay = getConversationCostDisplayFromMessages(mockMessages);
+    // Extract messages from conversation
+    const messages = conversation.messages || [];
+    
+    if (messages.length === 0) {
+      return res.status(404).json({
+        error: 'No messages found in this conversation',
+      });
+    }
+
+    // Calculate cost from actual messages
+    const costDisplay = getConversationCostDisplayFromMessages(messages);
     
     if (!costDisplay) {
       return res.status(404).json({
-        error: 'No cost data found for this conversation',
+        error: 'Could not calculate cost for this conversation',
       });
     }
 
