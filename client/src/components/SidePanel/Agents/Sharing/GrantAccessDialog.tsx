@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ACCESS_ROLE_IDS, PermissionTypes } from 'librechat-data-provider';
+import { ACCESS_ROLE_IDS, PermissionTypes, Permissions } from 'librechat-data-provider';
 import { Share2Icon, Users, Loader, Shield, Link, CopyCheck } from 'lucide-react';
 import {
   useGetResourcePermissionsQuery,
@@ -49,7 +49,7 @@ export default function GrantAccessDialog({
   });
   const hasPeoplePickerAccess = canViewUsers || canViewGroups;
 
-  // Determine type filter based on permissions
+  /** Type filter based on permissions */
   const peoplePickerTypeFilter = useMemo(() => {
     if (canViewUsers && canViewGroups) {
       return null; // Both types allowed
