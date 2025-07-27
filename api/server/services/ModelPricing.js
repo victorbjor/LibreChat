@@ -654,6 +654,31 @@ function getModelPricing(model, date = new Date()) {
  * @returns {Object} Cost breakdown
  */
 function calculateTokenCost(model, usage, date = new Date()) {
+  // Validate inputs
+  if (!model || typeof model !== 'string') {
+    return {
+      prompt: 0,
+      completion: 0,
+      cacheWrite: 0,
+      cacheRead: 0,
+      reasoning: 0,
+      total: 0,
+      error: 'Invalid model specified',
+    };
+  }
+  
+  if (!usage || typeof usage !== 'object') {
+    return {
+      prompt: 0,
+      completion: 0,
+      cacheWrite: 0,
+      cacheRead: 0,
+      reasoning: 0,
+      total: 0,
+      error: 'Invalid usage object',
+    };
+  }
+  
   const pricing = getModelPricing(model, date);
   if (!pricing) {
     return {

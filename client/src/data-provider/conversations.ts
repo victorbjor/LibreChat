@@ -58,12 +58,14 @@ export const useConversationCost = (
   return useQuery<ConversationCostDisplay | null>(
     [QueryKeys.conversationCost, conversationId],
     async () => {
-      if (!conversationId) return null;
+      if (!conversationId) {
+        return null;
+      }
 
       try {
         const response = await request.get(`/api/convos/${conversationId}/cost`);
-        // Ensure we always return a value, never undefined
-        return response.data || null;
+        // The request module returns the data directly, not wrapped in a response object
+        return response || null;
       } catch (error: any) {
         if (error.response?.status === 404) {
           return null; // No cost data available

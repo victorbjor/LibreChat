@@ -20,6 +20,7 @@ export default function ConversationCost() {
     },
   );
 
+
   // Refetch when new message is added
   useEffect(() => {
     if (conversationId && conversationId !== Constants.NEW_CONVO && latestMessage) {
@@ -31,19 +32,37 @@ export default function ConversationCost() {
     }
   }, [latestMessage?.messageId, conversationId, refetch]);
 
-  // Don't show for new conversations
+  // Always show something for debugging
   if (!conversationId || conversationId === Constants.NEW_CONVO) {
-    return null;
+    return (
+      <div className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-400">
+        <span>💰</span>
+        <span>--</span>
+      </div>
+    );
   }
 
-  // Don't show while loading or if there's an error
-  if (isLoading || error) {
-    return null;
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-500">
+        <span>💰</span>
+        <span>...</span>
+      </div>
+    );
   }
 
-  // Don't show if no cost data
-  if (!costData || costData.totalCostRaw < 0.0001) {
-    return null;
+  if (error) {
+    return null; // Don't show error state in UI
+  }
+
+  // Show $0.00 if no data or undefined cost
+  if (!costData || costData.totalCostRaw === undefined || costData.totalCostRaw === null || costData.totalCostRaw === 0) {
+    return (
+      <div className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-400">
+        <span>💰</span>
+        <span>$0.00</span>
+      </div>
+    );
   }
 
   const tooltipText = `${localize('com_ui_conversation_cost')}: ${costData.totalCost}

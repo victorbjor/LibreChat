@@ -3,8 +3,19 @@ const { logger } = require('~/config');
 
 /**
  * Calculate the total cost of a conversation from messages
- * @param {Array} messages - Array of message objects
- * @returns {Object|null} Cost summary or null if no messages
+ * @param {Array<Object>} messages - Array of message objects from the database
+ * @param {string} messages[].messageId - Unique identifier for the message
+ * @param {string|null} messages[].model - The model used (null for user messages)
+ * @param {number} messages[].tokenCount - Token count for the message
+ * @param {Object} [messages[].usage] - OpenAI-style usage object
+ * @param {Object} [messages[].tokens] - Alternative token format
+ * @param {Date} messages[].createdAt - When the message was created
+ * @returns {Object|null} Cost summary with total cost, breakdown, and model details
+ * @returns {number} returns.totalCost - Total cost across all models
+ * @returns {Object} returns.costBreakdown - Breakdown by token type
+ * @returns {Object} returns.tokenUsage - Token counts by type
+ * @returns {Array} returns.modelBreakdown - Per-model cost and usage
+ * @returns {Date} returns.lastUpdated - Timestamp of the last message
  */
 function calculateConversationCostFromMessages(messages) {
   try {
@@ -33,9 +44,19 @@ function calculateConversationCostFromMessages(messages) {
     let lastUpdated = new Date(0);
 
     // Process each message
-    messages.forEach((message) => {
-      // Skip messages without model or token info
-      if (!message.model || (!message.tokenCount && !message.tokens && !message.usage)) {
+    messages.forEach((message, index) => {
+      // Debug each message processing
+      const hasTokenInfo = !!(message.tokenCount || message.tokens || message.usage);
+      const inferredRole = message.model ? 'assistant' : 'user';
+      
+      // For LibreChat: Skip messages without token info, but allow both user and assistant messages
+      // User messages have model=null, assistant messages have specific models
+      if (!hasTokenInfo) {
+        return;
+      }
+      
+      // For assistant messages, we need a model for pricing
+      if (inferredRole === 'assistant' && !message.model) {
         return;
       }
 
@@ -44,13 +65,14 @@ function calculateConversationCostFromMessages(messages) {
         lastUpdated = messageDate;
       }
 
-      const model = message.model;
-
+      // For user messages, use a special key since they don't have a model  
+      const modelKey = message.model || 'user-input';
+      
       // Initialize model breakdown if not exists
-      if (!modelBreakdown.has(model)) {
-        modelBreakdown.set(model, {
-          model,
-          provider: getModelProvider(model),
+      if (!modelBreakdown.has(modelKey)) {
+        modelBreakdown.set(modelKey, {
+          model: modelKey,
+          provider: message.model ? getModelProvider(message.model) : 'user',
           cost: 0,
           tokenUsage: {
             promptTokens: 0,
@@ -63,7 +85,7 @@ function calculateConversationCostFromMessages(messages) {
         });
       }
 
-      const modelData = modelBreakdown.get(model);
+      const modelData = modelBreakdown.get(modelKey);
       modelData.messageCount++;
 
       // Extract token counts from message
@@ -80,8 +102,11 @@ function calculateConversationCostFromMessages(messages) {
         currentTokenUsage.promptTokens = message.tokens.prompt || message.tokens.input || 0;
         currentTokenUsage.completionTokens = message.tokens.completion || message.tokens.output || 0;
       } else if (message.tokenCount) {
-        // Simple token count - assume it's completion tokens for assistant messages
-        if (message.role === 'assistant') {
+        // LibreChat format: simple tokenCount field
+        // Infer role from model field: null model = user message, specific model = assistant message
+        const inferredRole = message.model ? 'assistant' : 'user';
+        
+        if (inferredRole === 'assistant') {
           currentTokenUsage.completionTokens = message.tokenCount;
         } else {
           currentTokenUsage.promptTokens = message.tokenCount;
@@ -94,27 +119,31 @@ function calculateConversationCostFromMessages(messages) {
         currentTokenUsage.cacheReadTokens = message.cacheTokens.read || 0;
       }
 
-      // Calculate cost using historical pricing
-      const cost = calculateTokenCost(model, currentTokenUsage, messageDate);
-      
-      if (!cost.error) {
-        // Add to overall breakdown
-        costBreakdown.prompt += cost.prompt;
-        costBreakdown.completion += cost.completion;
-        costBreakdown.cacheWrite += cost.cacheWrite;
-        costBreakdown.cacheRead += cost.cacheRead;
-        costBreakdown.reasoning += cost.reasoning;
-
-        // Add to model breakdown
-        modelData.cost += cost.total;
+      // Calculate cost using historical pricing (only for assistant messages with models)
+      if (message.model) {
+        const cost = calculateTokenCost(message.model, currentTokenUsage, messageDate);
         
-        // Update token usage
-        for (const [key, value] of Object.entries(currentTokenUsage)) {
-          modelData.tokenUsage[key] += value;
-          tokenUsage[key] += value;
+        if (!cost.error) {
+          // Add to overall breakdown
+          costBreakdown.prompt += cost.prompt;
+          costBreakdown.completion += cost.completion;
+          costBreakdown.cacheWrite += cost.cacheWrite;
+          costBreakdown.cacheRead += cost.cacheRead;
+          costBreakdown.reasoning += cost.reasoning;
+
+          // Add to model breakdown
+          modelData.cost += cost.total;
+          
+        } else {
+          logger.warn(`Could not calculate cost for model ${message.model}: ${cost.error}`);
         }
       } else {
-        logger.warn(`Could not calculate cost for model ${model}: ${cost.error}`);
+      }
+      
+      // Always update token usage (for both user and assistant messages)
+      for (const [key, value] of Object.entries(currentTokenUsage)) {
+        modelData.tokenUsage[key] += value;
+        tokenUsage[key] += value;
       }
     });
 
@@ -124,6 +153,7 @@ function calculateConversationCostFromMessages(messages) {
     // Convert model breakdown to array
     const modelBreakdownArray = Array.from(modelBreakdown.values())
       .sort((a, b) => b.cost - a.cost);
+
 
     return {
       totalCost: Math.round(totalCost * 100000) / 100000, // Round to 5 decimal places
@@ -146,11 +176,20 @@ function calculateConversationCostFromMessages(messages) {
 
 /**
  * Get simplified cost display for UI from messages
- * @param {Array} messages - Array of message objects
+ * @param {Array<Object>} messages - Array of message objects from the database
  * @returns {Object|null} Simplified cost data for UI display
+ * @returns {string} returns.totalCost - Formatted cost string (e.g., "$0.054")
+ * @returns {number} returns.totalCostRaw - Raw cost value for calculations
+ * @returns {string} returns.primaryModel - The model that contributed most to cost
+ * @returns {number} returns.totalTokens - Total token count across all messages
+ * @returns {Date} returns.lastUpdated - Timestamp of the last message
  */
 function getConversationCostDisplayFromMessages(messages) {
   try {
+    if (!messages || messages.length === 0) {
+      return null;
+    }
+    
     const costSummary = calculateConversationCostFromMessages(messages);
     if (!costSummary) {
       return null;

@@ -247,7 +247,7 @@ router.get('/:conversationId/cost', async (req, res) => {
     const { detailed = false } = req.query;
     const userId = req.user.id;
 
-    // Get the conversation with messages
+    // Get the conversation
     const conversation = await getConvo(userId, conversationId);
     
     if (!conversation) {
@@ -255,9 +255,13 @@ router.get('/:conversationId/cost', async (req, res) => {
         error: 'Conversation not found',
       });
     }
-
-    // Extract messages from conversation
-    const messages = conversation.messages || [];
+    
+    // Get actual messages from the messages collection
+    const { getMessages } = require('~/models/Message');
+    const messages = await getMessages({ 
+      user: userId,
+      conversationId: conversationId 
+    });
     
     if (messages.length === 0) {
       return res.status(404).json({
@@ -265,12 +269,20 @@ router.get('/:conversationId/cost', async (req, res) => {
       });
     }
 
+    
     // Calculate cost from actual messages
     const costDisplay = getConversationCostDisplayFromMessages(messages);
     
+    
     if (!costDisplay) {
-      return res.status(404).json({
-        error: 'Could not calculate cost for this conversation',
+      return res.json({
+        conversationId,
+        totalCost: '$0.00',
+        totalCostRaw: 0,
+        primaryModel: 'Unknown',
+        totalTokens: 0,
+        lastUpdated: new Date(),
+        error: 'No cost data available'
       });
     }
 
