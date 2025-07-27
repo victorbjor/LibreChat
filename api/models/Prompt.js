@@ -441,6 +441,16 @@ module.exports = {
       .lean();
 
     if (remainingPrompts.length === 0) {
+      // Remove all ACL entries for the promptGroup when deleting the last prompt
+      try {
+        await removeAllPermissions({
+          resourceType: 'promptGroup',
+          resourceId: groupId,
+        });
+      } catch (error) {
+        logger.error('Error removing promptGroup permissions:', error);
+      }
+
       await PromptGroup.deleteOne({ _id: groupId });
       await removeGroupFromAllProjects(groupId);
 

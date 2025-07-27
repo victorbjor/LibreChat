@@ -10,10 +10,10 @@ jest.mock('../../config/connect', () => jest.fn().mockResolvedValue(true));
 // Disable console for tests
 logger.silent = true;
 
-describe('Prompt Migration Script', () => {
+describe('PromptGroup Migration Script', () => {
   let mongoServer;
   let Prompt, PromptGroup, AclEntry, AccessRole, User, Project;
-  let migratePromptPermissions;
+  let migrateToPromptGroupPermissions;
   let testOwner, testProject;
   let ownerRole, viewerRole;
 
@@ -47,34 +47,8 @@ describe('Prompt Migration Script', () => {
       promptGroupIds: [],
     });
 
-    // Create access roles
+    // Create promptGroup access roles
     ownerRole = await AccessRole.create({
-      accessRoleId: 'prompt_owner',
-      name: 'Owner',
-      description: 'Full control over prompts',
-      resourceType: 'prompt',
-      permBits:
-        PermissionBits.VIEW | PermissionBits.EDIT | PermissionBits.DELETE | PermissionBits.SHARE,
-    });
-
-    viewerRole = await AccessRole.create({
-      accessRoleId: 'prompt_viewer',
-      name: 'Viewer',
-      description: 'Can view prompts',
-      resourceType: 'prompt',
-      permBits: PermissionBits.VIEW,
-    });
-
-    await AccessRole.create({
-      accessRoleId: 'prompt_editor',
-      name: 'Editor',
-      description: 'Can view and edit prompts',
-      resourceType: 'prompt',
-      permBits: PermissionBits.VIEW | PermissionBits.EDIT,
-    });
-
-    // Create promptGroup access roles for migration
-    await AccessRole.create({
       accessRoleId: 'promptGroup_owner',
       name: 'Owner',
       description: 'Full control over promptGroups',
@@ -83,7 +57,7 @@ describe('Prompt Migration Script', () => {
         PermissionBits.VIEW | PermissionBits.EDIT | PermissionBits.DELETE | PermissionBits.SHARE,
     });
 
-    await AccessRole.create({
+    viewerRole = await AccessRole.create({
       accessRoleId: 'promptGroup_viewer',
       name: 'Viewer',
       description: 'Can view promptGroups',
@@ -100,8 +74,8 @@ describe('Prompt Migration Script', () => {
     });
 
     // Import migration function
-    const migration = require('../../config/migrate-prompt-permissions');
-    migratePromptPermissions = migration.migratePromptPermissions;
+    const migration = require('../../config/migrate-to-promptgroup-permissions');
+    migrateToPromptGroupPermissions = migration.migrateToPromptGroupPermissions;
   });
 
   afterAll(async () => {
@@ -119,7 +93,7 @@ describe('Prompt Migration Script', () => {
     await testProject.save();
   });
 
-  it('should categorize prompts correctly in dry run', async () => {
+  it('should categorize promptGroups correctly in dry run', async () => {
     // Create global prompt group (in Global project)
     const globalPromptGroup = await PromptGroup.create({
       name: 'Global Group',
@@ -140,29 +114,12 @@ describe('Prompt Migration Script', () => {
     testProject.promptGroupIds = [globalPromptGroup._id];
     await testProject.save();
 
-    // Create prompts
-    await Prompt.create({
-      prompt: 'Global prompt',
-      name: 'Global',
-      author: testOwner._id,
-      groupId: globalPromptGroup._id,
-      type: 'text',
-    });
-
-    await Prompt.create({
-      prompt: 'Private prompt',
-      name: 'Private',
-      author: testOwner._id,
-      groupId: privatePromptGroup._id,
-      type: 'text',
-    });
-
-    const result = await migratePromptPermissions({ dryRun: true });
+    const result = await migrateToPromptGroupPermissions({ dryRun: true });
 
     expect(result.dryRun).toBe(true);
     expect(result.summary.total).toBe(2);
     expect(result.summary.globalViewAccess).toBe(1);
-    expect(result.summary.privatePrompts).toBe(1);
+    expect(result.summary.privateGroups).toBe(1);
   });
 
   it('should grant appropriate permissions during migration', async () => {
@@ -185,34 +142,17 @@ describe('Prompt Migration Script', () => {
     testProject.promptGroupIds = [globalPromptGroup._id];
     await testProject.save();
 
-    // Create prompts
-    const globalPrompt = await Prompt.create({
-      prompt: 'Global prompt',
-      name: 'Global',
-      author: testOwner._id,
-      groupId: globalPromptGroup._id,
-      type: 'text',
-    });
-
-    const privatePrompt = await Prompt.create({
-      prompt: 'Private prompt',
-      name: 'Private',
-      author: testOwner._id,
-      groupId: privatePromptGroup._id,
-      type: 'text',
-    });
-
-    const result = await migratePromptPermissions({ dryRun: false });
+    const result = await migrateToPromptGroupPermissions({ dryRun: false });
 
     expect(result.migrated).toBe(2);
     expect(result.errors).toBe(0);
     expect(result.ownerGrants).toBe(2);
     expect(result.publicViewGrants).toBe(1);
 
-    // Check global prompt permissions
+    // Check global promptGroup permissions
     const globalOwnerEntry = await AclEntry.findOne({
-      resourceType: 'prompt',
-      resourceId: globalPrompt._id,
+      resourceType: 'promptGroup',
+      resourceId: globalPromptGroup._id,
       principalType: 'user',
       principalId: testOwner._id,
     });
@@ -220,17 +160,17 @@ describe('Prompt Migration Script', () => {
     expect(globalOwnerEntry.permBits).toBe(ownerRole.permBits);
 
     const globalPublicEntry = await AclEntry.findOne({
-      resourceType: 'prompt',
-      resourceId: globalPrompt._id,
+      resourceType: 'promptGroup',
+      resourceId: globalPromptGroup._id,
       principalType: 'public',
     });
     expect(globalPublicEntry).toBeTruthy();
     expect(globalPublicEntry.permBits).toBe(viewerRole.permBits);
 
-    // Check private prompt permissions
+    // Check private promptGroup permissions
     const privateOwnerEntry = await AclEntry.findOne({
-      resourceType: 'prompt',
-      resourceId: privatePrompt._id,
+      resourceType: 'promptGroup',
+      resourceId: privatePromptGroup._id,
       principalType: 'user',
       principalId: testOwner._id,
     });
@@ -238,62 +178,96 @@ describe('Prompt Migration Script', () => {
     expect(privateOwnerEntry.permBits).toBe(ownerRole.permBits);
 
     const privatePublicEntry = await AclEntry.findOne({
-      resourceType: 'prompt',
-      resourceId: privatePrompt._id,
+      resourceType: 'promptGroup',
+      resourceId: privatePromptGroup._id,
       principalType: 'public',
     });
     expect(privatePublicEntry).toBeNull();
   });
 
-  it('should skip prompts that already have ACL entries', async () => {
-    // Create prompts
-    const promptGroup = await PromptGroup.create({
-      name: 'Test Group',
+  it('should skip promptGroups that already have ACL entries', async () => {
+    // Create prompt groups
+    const promptGroup1 = await PromptGroup.create({
+      name: 'Group 1',
       author: testOwner._id,
       authorName: testOwner.name,
       productionId: new ObjectId(),
     });
 
-    const prompt1 = await Prompt.create({
-      prompt: 'Prompt 1',
-      name: 'First',
+    const promptGroup2 = await PromptGroup.create({
+      name: 'Group 2',
       author: testOwner._id,
-      groupId: promptGroup._id,
-      type: 'text',
+      authorName: testOwner.name,
+      productionId: new ObjectId(),
     });
 
-    const prompt2 = await Prompt.create({
-      prompt: 'Prompt 2',
-      name: 'Second',
-      author: testOwner._id,
-      groupId: promptGroup._id,
-      type: 'text',
-    });
-
-    // Grant permission to one prompt manually (simulating it already has ACL)
+    // Grant permission to one promptGroup manually (simulating it already has ACL)
     await AclEntry.create({
       principalType: 'user',
       principalId: testOwner._id,
       principalModel: 'User',
-      resourceType: 'prompt',
-      resourceId: prompt1._id,
+      resourceType: 'promptGroup',
+      resourceId: promptGroup1._id,
       permBits: ownerRole.permBits,
       roleId: ownerRole._id,
       grantedBy: testOwner._id,
       grantedAt: new Date(),
     });
 
-    const result = await migratePromptPermissions({ dryRun: false });
+    const result = await migrateToPromptGroupPermissions({ dryRun: false });
 
-    // Should only migrate prompt2, skip prompt1
+    // Should only migrate promptGroup2, skip promptGroup1
     expect(result.migrated).toBe(1);
     expect(result.errors).toBe(0);
 
-    // Verify prompt2 now has permissions
-    const prompt2Entry = await AclEntry.findOne({
-      resourceType: 'prompt',
-      resourceId: prompt2._id,
+    // Verify promptGroup2 now has permissions
+    const group2Entry = await AclEntry.findOne({
+      resourceType: 'promptGroup',
+      resourceId: promptGroup2._id,
     });
-    expect(prompt2Entry).toBeTruthy();
+    expect(group2Entry).toBeTruthy();
+  });
+
+  it('should handle promptGroups with prompts correctly', async () => {
+    // Create a promptGroup with some prompts
+    const promptGroup = await PromptGroup.create({
+      name: 'Group with Prompts',
+      author: testOwner._id,
+      authorName: testOwner.name,
+      productionId: new ObjectId(),
+    });
+
+    // Create some prompts in this group
+    await Prompt.create({
+      prompt: 'First prompt',
+      author: testOwner._id,
+      groupId: promptGroup._id,
+      type: 'text',
+    });
+
+    await Prompt.create({
+      prompt: 'Second prompt',
+      author: testOwner._id,
+      groupId: promptGroup._id,
+      type: 'text',
+    });
+
+    const result = await migrateToPromptGroupPermissions({ dryRun: false });
+
+    expect(result.migrated).toBe(1);
+    expect(result.errors).toBe(0);
+
+    // Verify the promptGroup has permissions
+    const groupEntry = await AclEntry.findOne({
+      resourceType: 'promptGroup',
+      resourceId: promptGroup._id,
+    });
+    expect(groupEntry).toBeTruthy();
+
+    // Verify no prompt-level permissions were created
+    const promptEntries = await AclEntry.find({
+      resourceType: 'prompt',
+    });
+    expect(promptEntries).toHaveLength(0);
   });
 });

@@ -19,6 +19,9 @@ jest.mock('~/models/Role', () => ({
 jest.mock('~/server/middleware', () => ({
   requireJwtAuth: (req, res, next) => next(),
   canAccessPromptResource: jest.requireActual('~/server/middleware').canAccessPromptResource,
+  canAccessPromptViaGroup: jest.requireActual('~/server/middleware').canAccessPromptViaGroup,
+  canAccessPromptGroupResource:
+    jest.requireActual('~/server/middleware').canAccessPromptGroupResource,
 }));
 
 let app;
@@ -84,24 +87,24 @@ afterAll(async () => {
 });
 
 async function setupTestData() {
-  // Create access roles
+  // Create access roles for promptGroups
   testRoles = {
     viewer: await AccessRole.create({
-      accessRoleId: 'prompt_viewer',
+      accessRoleId: 'promptGroup_viewer',
       name: 'Viewer',
-      resourceType: 'prompt',
+      resourceType: 'promptGroup',
       permBits: PermissionBits.VIEW,
     }),
     editor: await AccessRole.create({
-      accessRoleId: 'prompt_editor',
+      accessRoleId: 'promptGroup_editor',
       name: 'Editor',
-      resourceType: 'prompt',
+      resourceType: 'promptGroup',
       permBits: PermissionBits.VIEW | PermissionBits.EDIT,
     }),
     owner: await AccessRole.create({
-      accessRoleId: 'prompt_owner',
+      accessRoleId: 'promptGroup_owner',
       name: 'Owner',
-      resourceType: 'prompt',
+      resourceType: 'promptGroup',
       permBits:
         PermissionBits.VIEW | PermissionBits.EDIT | PermissionBits.DELETE | PermissionBits.SHARE,
     }),
@@ -223,8 +226,8 @@ describe('Prompt Routes - ACL Permissions', () => {
 
       // Check ACL entry was created
       const aclEntry = await AclEntry.findOne({
-        resourceType: 'prompt',
-        resourceId: response.body.prompt._id,
+        resourceType: 'promptGroup',
+        resourceId: response.body.prompt.groupId,
         principalType: 'user',
         principalId: testUsers.owner._id,
       });
@@ -251,10 +254,10 @@ describe('Prompt Routes - ACL Permissions', () => {
       expect(response.body.group).toBeDefined();
       expect(response.body.group.name).toBe(promptData.group.name);
 
-      // Check ACL entry was created for the prompt
+      // Check ACL entry was created for the promptGroup
       const aclEntry = await AclEntry.findOne({
-        resourceType: 'prompt',
-        resourceId: response.body.prompt._id,
+        resourceType: 'promptGroup',
+        resourceId: response.body.group._id,
         principalType: 'user',
         principalId: testUsers.owner._id,
       });
@@ -294,13 +297,13 @@ describe('Prompt Routes - ACL Permissions', () => {
     });
 
     it('should retrieve prompt when user has view permissions', async () => {
-      // Grant view permissions
+      // Grant view permissions on the promptGroup
       await grantPermission({
         principalType: 'user',
         principalId: testUsers.owner._id,
-        resourceType: 'prompt',
-        resourceId: testPrompt._id,
-        accessRoleId: 'prompt_viewer',
+        resourceType: 'promptGroup',
+        resourceId: testGroup._id,
+        accessRoleId: 'promptGroup_viewer',
         grantedBy: testUsers.owner._id,
       });
 
@@ -318,7 +321,7 @@ describe('Prompt Routes - ACL Permissions', () => {
 
       // Verify error response
       expect(response.body.error).toBe('Forbidden');
-      expect(response.body.message).toBe('Insufficient permissions to access this prompt');
+      expect(response.body.message).toBe('Insufficient permissions to access this promptGroup');
     });
 
     it('should allow admin access without explicit permissions', async () => {
@@ -379,13 +382,13 @@ describe('Prompt Routes - ACL Permissions', () => {
       testGroup.promptIds = [testPrompt._id];
       await testGroup.save();
 
-      // Grant owner permissions
+      // Grant owner permissions on the promptGroup
       await grantPermission({
         principalType: 'user',
         principalId: testUsers.owner._id,
-        resourceType: 'prompt',
-        resourceId: testPrompt._id,
-        accessRoleId: 'prompt_owner',
+        resourceType: 'promptGroup',
+        resourceId: testGroup._id,
+        accessRoleId: 'promptGroup_owner',
         grantedBy: testUsers.owner._id,
       });
     });
@@ -410,8 +413,8 @@ describe('Prompt Routes - ACL Permissions', () => {
 
       // Verify ACL entries were removed
       const aclEntries = await AclEntry.find({
-        resourceType: 'prompt',
-        resourceId: testPrompt._id,
+        resourceType: 'promptGroup',
+        resourceId: testGroup._id,
       });
       expect(aclEntries).toHaveLength(0);
     });
@@ -426,13 +429,13 @@ describe('Prompt Routes - ACL Permissions', () => {
         groupId: testGroup._id,
       });
 
-      // Grant only viewer permissions to viewer user
+      // Grant only viewer permissions to viewer user on the promptGroup
       await grantPermission({
         principalType: 'user',
         principalId: testUsers.viewer._id,
-        resourceType: 'prompt',
-        resourceId: authorPrompt._id,
-        accessRoleId: 'prompt_viewer',
+        resourceType: 'promptGroup',
+        resourceId: testGroup._id,
+        accessRoleId: 'promptGroup_viewer',
         grantedBy: testUsers.editor._id,
       });
 
@@ -493,13 +496,13 @@ describe('Prompt Routes - ACL Permissions', () => {
     });
 
     it('should make prompt production when user has edit permissions', async () => {
-      // Grant edit permissions
+      // Grant edit permissions on the promptGroup
       await grantPermission({
         principalType: 'user',
         principalId: testUsers.owner._id,
-        resourceType: 'prompt',
-        resourceId: testPrompt._id,
-        accessRoleId: 'prompt_editor',
+        resourceType: 'promptGroup',
+        resourceId: testGroup._id,
+        accessRoleId: 'promptGroup_editor',
         grantedBy: testUsers.owner._id,
       });
 
@@ -531,13 +534,13 @@ describe('Prompt Routes - ACL Permissions', () => {
     });
 
     it('should deny making production when user lacks edit permissions', async () => {
-      // Grant only view permissions to viewer
+      // Grant only view permissions to viewer on the promptGroup
       await grantPermission({
         principalType: 'user',
         principalId: testUsers.viewer._id,
-        resourceType: 'prompt',
-        resourceId: testPrompt._id,
-        accessRoleId: 'prompt_viewer',
+        resourceType: 'promptGroup',
+        resourceId: testGroup._id,
+        accessRoleId: 'promptGroup_viewer',
         grantedBy: testUsers.owner._id,
       });
 
@@ -588,13 +591,13 @@ describe('Prompt Routes - ACL Permissions', () => {
         groupId: publicGroup._id,
       });
 
-      // Grant public viewer access
+      // Grant public viewer access on the promptGroup
       await grantPermission({
         principalType: 'public',
         principalId: null,
-        resourceType: 'prompt',
-        resourceId: publicPrompt._id,
-        accessRoleId: 'prompt_viewer',
+        resourceType: 'promptGroup',
+        resourceId: publicGroup._id,
+        accessRoleId: 'promptGroup_viewer',
         grantedBy: testUsers.owner._id,
       });
     });

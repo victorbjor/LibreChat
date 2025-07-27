@@ -16,8 +16,12 @@ const {
   // updatePromptLabels,
   makePromptProduction,
 } = require('~/models/Prompt');
+const {
+  canAccessPromptGroupResource,
+  canAccessPromptViaGroup,
+  requireJwtAuth,
+} = require('~/server/middleware');
 const { grantPermission } = require('~/server/services/PermissionService');
-const { requireJwtAuth, canAccessPromptResource } = require('~/server/middleware');
 const { getRoleByName } = require('~/models/Role');
 
 const router = express.Router();
@@ -137,23 +141,23 @@ const createPrompt = async (req, res) => {
       result = await savePrompt(saveData);
     }
 
-    // Grant owner permissions to the creator
-    if (result.prompt && result.prompt._id) {
+    // Grant owner permissions to the creator on the promptGroup
+    if (result.prompt && result.prompt._id && result.prompt.groupId) {
       try {
         await grantPermission({
           principalType: 'user',
           principalId: req.user.id,
-          resourceType: 'prompt',
-          resourceId: result.prompt._id,
-          accessRoleId: 'prompt_owner',
+          resourceType: 'promptGroup',
+          resourceId: result.prompt.groupId,
+          accessRoleId: 'promptGroup_owner',
           grantedBy: req.user.id,
         });
         logger.debug(
-          `[createPrompt] Granted owner permissions to user ${req.user.id} for prompt ${result.prompt._id}`,
+          `[createPrompt] Granted owner permissions to user ${req.user.id} for promptGroup ${result.prompt.groupId}`,
         );
       } catch (permissionError) {
         logger.error(
-          `[createPrompt] Failed to grant owner permissions for prompt ${result.prompt._id}:`,
+          `[createPrompt] Failed to grant owner permissions for promptGroup ${result.prompt.groupId}:`,
           permissionError,
         );
       }
@@ -192,12 +196,19 @@ const patchPromptGroup = async (req, res) => {
   }
 };
 
-router.patch('/groups/:groupId', checkGlobalPromptShare, patchPromptGroup);
+router.patch(
+  '/groups/:groupId',
+  checkGlobalPromptShare,
+  canAccessPromptGroupResource({
+    requiredPermission: PermissionBits.EDIT,
+  }),
+  patchPromptGroup,
+);
 
 router.patch(
   '/:promptId/tags/production',
   checkPromptCreate,
-  canAccessPromptResource({
+  canAccessPromptViaGroup({
     requiredPermission: PermissionBits.EDIT,
     resourceIdParam: 'promptId',
   }),
@@ -215,7 +226,7 @@ router.patch(
 
 router.get(
   '/:promptId',
-  canAccessPromptResource({
+  canAccessPromptViaGroup({
     requiredPermission: PermissionBits.VIEW,
     resourceIdParam: 'promptId',
   }),
@@ -285,7 +296,7 @@ const deletePromptGroupController = async (req, res) => {
 router.delete(
   '/:promptId',
   checkPromptCreate,
-  canAccessPromptResource({
+  canAccessPromptViaGroup({
     requiredPermission: PermissionBits.DELETE,
     resourceIdParam: 'promptId',
   }),

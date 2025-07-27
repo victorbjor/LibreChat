@@ -146,6 +146,28 @@ export function createAccessRoleMethods(mongoose: typeof import('mongoose')) {
         resourceType: 'prompt',
         permBits: RoleBits.OWNER,
       },
+      // PromptGroup access roles
+      {
+        accessRoleId: 'promptGroup_viewer',
+        name: 'com_ui_role_viewer',
+        description: 'com_ui_role_viewer_desc',
+        resourceType: 'promptGroup',
+        permBits: RoleBits.VIEWER,
+      },
+      {
+        accessRoleId: 'promptGroup_editor',
+        name: 'com_ui_role_editor',
+        description: 'com_ui_role_editor_desc',
+        resourceType: 'promptGroup',
+        permBits: RoleBits.EDITOR,
+      },
+      {
+        accessRoleId: 'promptGroup_owner',
+        name: 'com_ui_role_owner',
+        description: 'com_ui_role_owner_desc',
+        resourceType: 'promptGroup',
+        permBits: RoleBits.OWNER,
+      },
     ];
 
     const result: Record<string, IAccessRole> = {};

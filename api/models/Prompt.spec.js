@@ -15,7 +15,7 @@ logger.silent = true;
 let mongoServer;
 let Prompt, PromptGroup, AclEntry, AccessRole, User, Group, Project;
 let promptFns, permissionService;
-let testUsers, testGroups, testRoles, testProject;
+let testUsers, testGroups, testRoles;
 
 beforeAll(async () => {
   // Set up MongoDB memory server
@@ -46,27 +46,27 @@ afterAll(async () => {
 });
 
 async function setupTestData() {
-  // Create access roles
+  // Create access roles for promptGroups
   testRoles = {
     viewer: await AccessRole.create({
-      accessRoleId: 'prompt_viewer',
+      accessRoleId: 'promptGroup_viewer',
       name: 'Viewer',
-      description: 'Can view prompts',
-      resourceType: 'prompt',
+      description: 'Can view promptGroups',
+      resourceType: 'promptGroup',
       permBits: PermissionBits.VIEW,
     }),
     editor: await AccessRole.create({
-      accessRoleId: 'prompt_editor',
+      accessRoleId: 'promptGroup_editor',
       name: 'Editor',
-      description: 'Can view and edit prompts',
-      resourceType: 'prompt',
+      description: 'Can view and edit promptGroups',
+      resourceType: 'promptGroup',
       permBits: PermissionBits.VIEW | PermissionBits.EDIT,
     }),
     owner: await AccessRole.create({
-      accessRoleId: 'prompt_owner',
+      accessRoleId: 'promptGroup_owner',
       name: 'Owner',
-      description: 'Full control over prompts',
-      resourceType: 'prompt',
+      description: 'Full control over promptGroups',
+      resourceType: 'promptGroup',
       permBits:
         PermissionBits.VIEW | PermissionBits.EDIT | PermissionBits.DELETE | PermissionBits.SHARE,
     }),
@@ -113,8 +113,7 @@ async function setupTestData() {
     }),
   };
 
-  // Create test project
-  testProject = await Project.create({
+  await Project.create({
     name: 'Global',
     description: 'Global project',
     promptGroupIds: [],
@@ -143,22 +142,22 @@ describe('Prompt ACL Permissions', () => {
         author: testUsers.owner._id,
       };
 
-      const result = await promptFns.savePrompt(promptData);
+      await promptFns.savePrompt(promptData);
 
       // Manually grant permissions as would happen in the route
       await permissionService.grantPermission({
         principalType: 'user',
         principalId: testUsers.owner._id,
-        resourceType: 'prompt',
-        resourceId: result.prompt._id,
-        accessRoleId: 'prompt_owner',
+        resourceType: 'promptGroup',
+        resourceId: testGroup._id,
+        accessRoleId: 'promptGroup_owner',
         grantedBy: testUsers.owner._id,
       });
 
       // Check ACL entry
       const aclEntry = await AclEntry.findOne({
-        resourceType: 'prompt',
-        resourceId: result.prompt._id,
+        resourceType: 'promptGroup',
+        resourceId: testGroup._id,
         principalType: 'user',
         principalId: testUsers.owner._id,
       });
@@ -169,7 +168,6 @@ describe('Prompt ACL Permissions', () => {
   });
 
   describe('Accessing Prompts', () => {
-    let testPrompt;
     let testPromptGroup;
 
     beforeEach(async () => {
@@ -182,7 +180,7 @@ describe('Prompt ACL Permissions', () => {
       });
 
       // Create a prompt
-      testPrompt = await Prompt.create({
+      await Prompt.create({
         prompt: 'Test prompt for access control',
         name: 'Access Test Prompt',
         author: testUsers.owner._id,
@@ -194,9 +192,9 @@ describe('Prompt ACL Permissions', () => {
       await permissionService.grantPermission({
         principalType: 'user',
         principalId: testUsers.owner._id,
-        resourceType: 'prompt',
-        resourceId: testPrompt._id,
-        accessRoleId: 'prompt_owner',
+        resourceType: 'promptGroup',
+        resourceId: testPromptGroup._id,
+        accessRoleId: 'promptGroup_owner',
         grantedBy: testUsers.owner._id,
       });
     });
@@ -210,8 +208,8 @@ describe('Prompt ACL Permissions', () => {
     it('owner should have full access to their prompt', async () => {
       const hasAccess = await permissionService.checkPermission({
         userId: testUsers.owner._id,
-        resourceType: 'prompt',
-        resourceId: testPrompt._id,
+        resourceType: 'promptGroup',
+        resourceId: testPromptGroup._id,
         requiredPermission: PermissionBits.VIEW,
       });
 
@@ -219,8 +217,8 @@ describe('Prompt ACL Permissions', () => {
 
       const canEdit = await permissionService.checkPermission({
         userId: testUsers.owner._id,
-        resourceType: 'prompt',
-        resourceId: testPrompt._id,
+        resourceType: 'promptGroup',
+        resourceId: testPromptGroup._id,
         requiredPermission: PermissionBits.EDIT,
       });
 
@@ -232,23 +230,23 @@ describe('Prompt ACL Permissions', () => {
       await permissionService.grantPermission({
         principalType: 'user',
         principalId: testUsers.viewer._id,
-        resourceType: 'prompt',
-        resourceId: testPrompt._id,
-        accessRoleId: 'prompt_viewer',
+        resourceType: 'promptGroup',
+        resourceId: testPromptGroup._id,
+        accessRoleId: 'promptGroup_viewer',
         grantedBy: testUsers.owner._id,
       });
 
       const canView = await permissionService.checkPermission({
         userId: testUsers.viewer._id,
-        resourceType: 'prompt',
-        resourceId: testPrompt._id,
+        resourceType: 'promptGroup',
+        resourceId: testPromptGroup._id,
         requiredPermission: PermissionBits.VIEW,
       });
 
       const canEdit = await permissionService.checkPermission({
         userId: testUsers.viewer._id,
-        resourceType: 'prompt',
-        resourceId: testPrompt._id,
+        resourceType: 'promptGroup',
+        resourceId: testPromptGroup._id,
         requiredPermission: PermissionBits.EDIT,
       });
 
@@ -259,8 +257,8 @@ describe('Prompt ACL Permissions', () => {
     it('user without permissions should have no access', async () => {
       const hasAccess = await permissionService.checkPermission({
         userId: testUsers.noAccess._id,
-        resourceType: 'prompt',
-        resourceId: testPrompt._id,
+        resourceType: 'promptGroup',
+        resourceId: testPromptGroup._id,
         requiredPermission: PermissionBits.VIEW,
       });
 
@@ -272,8 +270,8 @@ describe('Prompt ACL Permissions', () => {
       // The middleware layer handles admin bypass, not the permission service
       const hasAccess = await permissionService.checkPermission({
         userId: testUsers.admin._id,
-        resourceType: 'prompt',
-        resourceId: testPrompt._id,
+        resourceType: 'promptGroup',
+        resourceId: testPromptGroup._id,
         requiredPermission: PermissionBits.VIEW,
       });
 
@@ -286,7 +284,6 @@ describe('Prompt ACL Permissions', () => {
   });
 
   describe('Group-based Access', () => {
-    let testPrompt;
     let testPromptGroup;
 
     beforeEach(async () => {
@@ -298,7 +295,7 @@ describe('Prompt ACL Permissions', () => {
         productionId: new ObjectId(),
       });
 
-      testPrompt = await Prompt.create({
+      await Prompt.create({
         prompt: 'Group access test prompt',
         name: 'Group Test',
         author: testUsers.owner._id,
@@ -351,23 +348,21 @@ describe('Prompt ACL Permissions', () => {
         throw new Error(`Failed to save prompt: ${prompt?.message || 'Unknown error'}`);
       }
 
-      const testPromptId = prompt.prompt._id;
-
       // Grant edit permissions to the group
       await permissionService.grantPermission({
         principalType: 'group',
         principalId: testGroups.editors._id,
-        resourceType: 'prompt',
-        resourceId: testPromptId,
-        accessRoleId: 'prompt_editor',
+        resourceType: 'promptGroup',
+        resourceId: testPromptGroup._id,
+        accessRoleId: 'promptGroup_editor',
         grantedBy: testUsers.owner._id,
       });
 
       // Check if group member has access
       const hasAccess = await permissionService.checkPermission({
         userId: testUsers.editor._id,
-        resourceType: 'prompt',
-        resourceId: testPromptId,
+        resourceType: 'promptGroup',
+        resourceId: testPromptGroup._id,
         requiredPermission: PermissionBits.EDIT,
       });
 
@@ -376,8 +371,8 @@ describe('Prompt ACL Permissions', () => {
       // Check that non-member doesn't have access
       const nonMemberAccess = await permissionService.checkPermission({
         userId: testUsers.viewer._id,
-        resourceType: 'prompt',
-        resourceId: testPromptId,
+        resourceType: 'promptGroup',
+        resourceId: testPromptGroup._id,
         requiredPermission: PermissionBits.EDIT,
       });
 
@@ -386,66 +381,73 @@ describe('Prompt ACL Permissions', () => {
   });
 
   describe('Public Access', () => {
-    let publicPrompt, privatePrompt;
-    let testPromptGroup;
+    let publicPromptGroup, privatePromptGroup;
 
     beforeEach(async () => {
-      // Create a prompt group first
-      testPromptGroup = await PromptGroup.create({
+      // Create separate prompt groups for public and private access
+      publicPromptGroup = await PromptGroup.create({
         name: 'Public Access Test Group',
         author: testUsers.owner._id,
         authorName: testUsers.owner.name,
         productionId: new ObjectId(),
       });
 
-      // Create prompts
-      publicPrompt = await Prompt.create({
+      privatePromptGroup = await PromptGroup.create({
+        name: 'Private Access Test Group',
+        author: testUsers.owner._id,
+        authorName: testUsers.owner.name,
+        productionId: new ObjectId(),
+      });
+
+      // Create prompts in their respective groups
+      await Prompt.create({
         prompt: 'Public prompt',
         name: 'Public',
         author: testUsers.owner._id,
-        groupId: testPromptGroup._id,
+        groupId: publicPromptGroup._id,
         type: 'text',
       });
 
-      privatePrompt = await Prompt.create({
+      await Prompt.create({
         prompt: 'Private prompt',
         name: 'Private',
         author: testUsers.owner._id,
-        groupId: testPromptGroup._id,
+        groupId: privatePromptGroup._id,
         type: 'text',
       });
 
-      // Grant public view access to publicPrompt
+      // Grant public view access to publicPromptGroup
       await permissionService.grantPermission({
         principalType: 'public',
         principalId: null,
-        resourceType: 'prompt',
-        resourceId: publicPrompt._id,
-        accessRoleId: 'prompt_viewer',
+        resourceType: 'promptGroup',
+        resourceId: publicPromptGroup._id,
+        accessRoleId: 'promptGroup_viewer',
         grantedBy: testUsers.owner._id,
       });
 
-      // Grant only owner access to privatePrompt
+      // Grant only owner access to privatePromptGroup
       await permissionService.grantPermission({
         principalType: 'user',
         principalId: testUsers.owner._id,
-        resourceType: 'prompt',
-        resourceId: privatePrompt._id,
-        accessRoleId: 'prompt_owner',
+        resourceType: 'promptGroup',
+        resourceId: privatePromptGroup._id,
+        accessRoleId: 'promptGroup_owner',
         grantedBy: testUsers.owner._id,
       });
     });
 
     afterEach(async () => {
       await Prompt.deleteMany({});
+      await PromptGroup.deleteMany({});
       await AclEntry.deleteMany({});
     });
 
     it('public prompt should be accessible to any user', async () => {
       const hasAccess = await permissionService.checkPermission({
         userId: testUsers.noAccess._id,
-        resourceType: 'prompt',
-        resourceId: publicPrompt._id,
+        resourceType: 'promptGroup',
+        resourceId: publicPromptGroup._id,
         requiredPermission: PermissionBits.VIEW,
         includePublic: true,
       });
@@ -456,8 +458,8 @@ describe('Prompt ACL Permissions', () => {
     it('private prompt should not be accessible to unauthorized users', async () => {
       const hasAccess = await permissionService.checkPermission({
         userId: testUsers.noAccess._id,
-        resourceType: 'prompt',
-        resourceId: privatePrompt._id,
+        resourceType: 'promptGroup',
+        resourceId: privatePromptGroup._id,
         requiredPermission: PermissionBits.VIEW,
         includePublic: true,
       });
@@ -499,16 +501,16 @@ describe('Prompt ACL Permissions', () => {
       await permissionService.grantPermission({
         principalType: 'user',
         principalId: testUsers.owner._id,
-        resourceType: 'prompt',
-        resourceId: testPromptId,
-        accessRoleId: 'prompt_owner',
+        resourceType: 'promptGroup',
+        resourceId: testPromptGroup._id,
+        accessRoleId: 'promptGroup_owner',
         grantedBy: testUsers.owner._id,
       });
 
       // Verify ACL entry exists
       const beforeDelete = await AclEntry.find({
-        resourceType: 'prompt',
-        resourceId: testPromptId,
+        resourceType: 'promptGroup',
+        resourceId: testPromptGroup._id,
       });
       expect(beforeDelete).toHaveLength(1);
 
@@ -522,8 +524,8 @@ describe('Prompt ACL Permissions', () => {
 
       // Verify ACL entries are removed
       const aclEntries = await AclEntry.find({
-        resourceType: 'prompt',
-        resourceId: testPromptId,
+        resourceType: 'promptGroup',
+        resourceId: testPromptGroup._id,
       });
 
       expect(aclEntries).toHaveLength(0);
