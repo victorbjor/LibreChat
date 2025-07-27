@@ -17,6 +17,9 @@ const {
   getMultipleConversationCosts,
   calculateConversationCost,
 } = require('~/server/services/ConversationCost');
+const {
+  getConversationCostDisplayFromMessages,
+} = require('~/server/services/ConversationCostDynamic');
 
 const assistantClients = {
   [EModelEndpoint.azureAssistants]: require('~/server/services/Endpoints/azureAssistants'),
@@ -244,25 +247,36 @@ router.get('/:conversationId/cost', async (req, res) => {
     const { detailed = false } = req.query;
     const userId = req.user.id;
 
-    if (detailed === 'true') {
-      // Return detailed cost breakdown
-      const costSummary = await calculateConversationCost(conversationId, userId);
-      if (!costSummary) {
-        return res.status(404).json({
-          error: 'No cost data found for this conversation',
-        });
+    // TODO: Replace this with actual message fetching from LibreChat's message store
+    // For now, we'll return a mock response to test the frontend
+    const mockMessages = [
+      {
+        role: 'user',
+        model: 'gpt-4o-mini',
+        tokenCount: 150,
+        createdAt: new Date(),
+      },
+      {
+        role: 'assistant', 
+        model: 'gpt-4o-mini',
+        tokenCount: 200,
+        createdAt: new Date(),
       }
-      res.json(costSummary);
-    } else {
-      // Return simplified cost display
-      const costDisplay = await getConversationCostDisplay(conversationId, userId);
-      if (!costDisplay) {
-        return res.status(404).json({
-          error: 'No cost data found for this conversation',
-        });
-      }
-      res.json(costDisplay);
+    ];
+
+    // Calculate cost from messages
+    const costDisplay = getConversationCostDisplayFromMessages(mockMessages);
+    
+    if (!costDisplay) {
+      return res.status(404).json({
+        error: 'No cost data found for this conversation',
+      });
     }
+
+    // Add conversationId to response
+    costDisplay.conversationId = conversationId;
+    
+    res.json(costDisplay);
   } catch (error) {
     logger.error('Error getting conversation cost:', error);
     res.status(500).json({
