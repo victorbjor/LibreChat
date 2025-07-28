@@ -192,21 +192,13 @@ describe('Prompt Routes - ACL Permissions', () => {
     });
 
     it('should create a prompt and grant owner permissions', async () => {
-      // First create a group to associate with the prompt
-      const testGroup = await PromptGroup.create({
-        name: 'Test Group for POST',
-        category: 'testing',
-        author: testUsers.owner._id,
-        authorName: testUsers.owner.name,
-        productionId: new ObjectId(),
-      });
-
       const promptData = {
         prompt: {
           prompt: 'Test prompt content',
-          name: 'Test Prompt',
           type: 'text',
-          groupId: testGroup._id,
+        },
+        group: {
+          name: 'Test Prompt Group',
         },
       };
 

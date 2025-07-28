@@ -74,7 +74,7 @@ describe('PromptGroup Migration Script', () => {
     });
 
     // Import migration function
-    const migration = require('../../config/migrate-to-promptgroup-permissions');
+    const migration = require('../../config/migrate-prompt-permissions');
     migrateToPromptGroupPermissions = migration.migrateToPromptGroupPermissions;
   });
 
