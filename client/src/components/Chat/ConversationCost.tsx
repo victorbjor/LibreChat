@@ -11,15 +11,16 @@ export default function ConversationCost() {
   const { conversationId } = useParams();
   const localize = useLocalize();
   const latestMessage = useRecoilValue(store.latestMessageFamily(0));
-  
-  const { data: costData, isLoading, error, refetch } = useConversationCost(
-    conversationId !== Constants.NEW_CONVO ? conversationId : undefined,
-    {
-      refetchOnWindowFocus: false,
-      retry: false,
-    },
-  );
 
+  const {
+    data: costData,
+    isLoading,
+    error,
+    refetch,
+  } = useConversationCost(conversationId !== Constants.NEW_CONVO ? conversationId : undefined, {
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
 
   // Refetch when new message is added
   useEffect(() => {
@@ -27,10 +28,10 @@ export default function ConversationCost() {
       const timeoutId = setTimeout(() => {
         refetch();
       }, 2000);
-      
+
       return () => clearTimeout(timeoutId);
     }
-  }, [latestMessage?.messageId, conversationId, refetch]);
+  }, [latestMessage?.messageId, conversationId, refetch, latestMessage]);
 
   // Always show something for debugging
   if (!conversationId || conversationId === Constants.NEW_CONVO) {
@@ -56,7 +57,12 @@ export default function ConversationCost() {
   }
 
   // Show $0.00 if no data or undefined cost
-  if (!costData || costData.totalCostRaw === undefined || costData.totalCostRaw === null || costData.totalCostRaw === 0) {
+  if (
+    !costData ||
+    costData.totalCostRaw === undefined ||
+    costData.totalCostRaw === null ||
+    costData.totalCostRaw === 0
+  ) {
     return (
       <div className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-400">
         <span>💰</span>

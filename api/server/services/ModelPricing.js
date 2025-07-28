@@ -3,7 +3,7 @@ const { logger } = require('~/config');
 /**
  * Model pricing configuration with historical data
  * Prices are in USD per 1M tokens
- * 
+ *
  * Format:
  * - Each model has an array of pricing periods
  * - Periods are sorted by effectiveFrom date (newest first)
@@ -52,7 +52,7 @@ const PRICING_DATA = {
       completion: 2.0,
     },
   ],
-  'o1': [
+  o1: [
     {
       effectiveFrom: new Date('2024-12-05'),
       prompt: 15.0,
@@ -348,7 +348,7 @@ const PRICING_DATA = {
   'gemini-2.0-flash-exp': [
     {
       effectiveFrom: new Date('2024-12-11'),
-      prompt: 0.0,  // Free during experimental phase
+      prompt: 0.0, // Free during experimental phase
       completion: 0.0,
     },
   ],
@@ -362,7 +362,7 @@ const PRICING_DATA = {
   'gemini-2.0-pro-exp-02-05': [
     {
       effectiveFrom: new Date('2025-02-05'),
-      prompt: 0.0,  // Free during experimental phase
+      prompt: 0.0, // Free during experimental phase
       completion: 0.0,
     },
   ],
@@ -666,7 +666,7 @@ function calculateTokenCost(model, usage, date = new Date()) {
       error: 'Invalid model specified',
     };
   }
-  
+
   if (!usage || typeof usage !== 'object') {
     return {
       prompt: 0,
@@ -678,7 +678,7 @@ function calculateTokenCost(model, usage, date = new Date()) {
       error: 'Invalid usage object',
     };
   }
-  
+
   const pricing = getModelPricing(model, date);
   if (!pricing) {
     return {
@@ -722,7 +722,8 @@ function calculateTokenCost(model, usage, date = new Date()) {
   }
 
   // Calculate total
-  costs.total = costs.prompt + costs.completion + costs.cacheWrite + costs.cacheRead + costs.reasoning;
+  costs.total =
+    costs.prompt + costs.completion + costs.cacheWrite + costs.cacheRead + costs.reasoning;
 
   return costs;
 }

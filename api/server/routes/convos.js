@@ -12,11 +12,7 @@ const requireJwtAuth = require('~/server/middleware/requireJwtAuth');
 const { importConversations } = require('~/server/utils/import');
 const { deleteToolCalls } = require('~/models/ToolCall');
 const getLogStores = require('~/cache/getLogStores');
-const {
-  getConversationCostDisplay,
-  getMultipleConversationCosts,
-  calculateConversationCost,
-} = require('~/server/services/ConversationCost');
+const { getMultipleConversationCosts } = require('~/server/services/ConversationCost');
 const {
   getConversationCostDisplayFromMessages,
 } = require('~/server/services/ConversationCostDynamic');
@@ -244,36 +240,34 @@ router.post('/duplicate', async (req, res) => {
 router.get('/:conversationId/cost', async (req, res) => {
   try {
     const { conversationId } = req.params;
-    const { detailed = false } = req.query;
+    const { detailed: _detailed = false } = req.query;
     const userId = req.user.id;
 
     // Get the conversation
     const conversation = await getConvo(userId, conversationId);
-    
+
     if (!conversation) {
       return res.status(404).json({
         error: 'Conversation not found',
       });
     }
-    
+
     // Get actual messages from the messages collection
     const { getMessages } = require('~/models/Message');
-    const messages = await getMessages({ 
+    const messages = await getMessages({
       user: userId,
-      conversationId: conversationId 
+      conversationId: conversationId,
     });
-    
+
     if (messages.length === 0) {
       return res.status(404).json({
         error: 'No messages found in this conversation',
       });
     }
 
-    
     // Calculate cost from actual messages
     const costDisplay = getConversationCostDisplayFromMessages(messages);
-    
-    
+
     if (!costDisplay) {
       return res.json({
         conversationId,
@@ -282,13 +276,13 @@ router.get('/:conversationId/cost', async (req, res) => {
         primaryModel: 'Unknown',
         totalTokens: 0,
         lastUpdated: new Date(),
-        error: 'No cost data available'
+        error: 'No cost data available',
       });
     }
 
     // Add conversationId to response
     costDisplay.conversationId = conversationId;
-    
+
     res.json(costDisplay);
   } catch (error) {
     logger.error('Error getting conversation cost:', error);
