@@ -50,7 +50,9 @@ export default function ManagePermissionsDialog({
 
   const [managedShares, setManagedShares] = useState<TPrincipal[]>([]);
   const [managedIsPublic, setManagedIsPublic] = useState(false);
-  const [managedPublicRole, setManagedPublicRole] = useState<string>(ACCESS_ROLE_IDS.AGENT_VIEWER);
+  const [managedPublicRole, setManagedPublicRole] = useState<ACCESS_ROLE_IDS>(
+    ACCESS_ROLE_IDS.AGENT_VIEWER,
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
@@ -85,7 +87,7 @@ export default function ManagePermissionsDialog({
     setHasChanges(true);
   };
 
-  const handleRoleChange = (idOnTheSource: string, newRole: string) => {
+  const handleRoleChange = (idOnTheSource: string, newRole: ACCESS_ROLE_IDS) => {
     setManagedShares(
       managedShares.map((s) =>
         s.idOnTheSource === idOnTheSource ? { ...s, accessRoleId: newRole } : s,
@@ -163,7 +165,7 @@ export default function ManagePermissionsDialog({
       setManagedPublicRole(ACCESS_ROLE_IDS.AGENT_VIEWER);
     }
   };
-  const handlePublicRoleChange = (role: string) => {
+  const handlePublicRoleChange = (role: ACCESS_ROLE_IDS) => {
     setManagedPublicRole(role);
     setHasChanges(true);
   };

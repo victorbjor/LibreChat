@@ -221,10 +221,10 @@ export type TAvailableRolesResponse = {
  */
 export const getResourcePermissionsResponseSchema = z.object({
   resourceType: z.string(),
-  resourceId: z.string(),
+  resourceId: z.nativeEnum(ACCESS_ROLE_IDS),
   principals: z.array(principalSchema),
   public: z.boolean(),
-  publicAccessRoleId: z.string().optional(),
+  publicAccessRoleId: z.nativeEnum(ACCESS_ROLE_IDS).optional(),
 });
 
 /**

@@ -10,7 +10,7 @@ import { useLocalize } from '~/hooks';
 interface SelectedPrincipalsListProps {
   principles: TPrincipal[];
   onRemoveHandler: (idOnTheSource: string) => void;
-  onRoleChange?: (idOnTheSource: string, newRoleId: string) => void;
+  onRoleChange?: (idOnTheSource: string, newRoleId: ACCESS_ROLE_IDS) => void;
   availableRoles?: Omit<TAccessRole, 'resourceType'>[];
   className?: string;
 }
