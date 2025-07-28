@@ -26,6 +26,14 @@ export type TPrincipalSource = 'local' | 'entra';
 export type TAccessLevel = 'none' | 'viewer' | 'editor' | 'owner';
 
 /**
+ * Resource types for permission system
+ */
+export enum ResourceType {
+  AGENT = 'agent',
+  PROMPT_GROUP = 'promptGroup',
+}
+
+/**
  * Permission bit constants for bitwise operations
  */
 export enum PERMISSION_BITS {
@@ -76,7 +84,7 @@ export const accessRoleSchema = z.object({
   accessRoleId: z.nativeEnum(ACCESS_ROLE_IDS),
   name: z.string(),
   description: z.string().optional(),
-  resourceType: z.string().default('agent'),
+  resourceType: z.nativeEnum(ResourceType).default(ResourceType.AGENT),
   permBits: z.number(),
 });
 
@@ -99,7 +107,7 @@ export const permissionEntrySchema = z.object({
  * Resource permissions response schema
  */
 export const resourcePermissionsResponseSchema = z.object({
-  resourceType: z.string(),
+  resourceType: z.nativeEnum(ResourceType),
   resourceId: z.string(),
   permissions: z.array(permissionEntrySchema),
 });
@@ -211,7 +219,7 @@ export type TPrincipalSearchResponse = {
  * Available roles response
  */
 export type TAvailableRolesResponse = {
-  resourceType: string;
+  resourceType: ResourceType;
   roles: TAccessRole[];
 };
 
@@ -220,7 +228,7 @@ export type TAvailableRolesResponse = {
  * This matches the enhanced aggregation-based endpoint response format
  */
 export const getResourcePermissionsResponseSchema = z.object({
-  resourceType: z.string(),
+  resourceType: z.nativeEnum(ResourceType),
   resourceId: z.nativeEnum(ACCESS_ROLE_IDS),
   principals: z.array(principalSchema),
   public: z.boolean(),
