@@ -24,11 +24,9 @@ export default function AccessRolesPicker({
 }: AccessRolesPickerProps) {
   const localize = useLocalize();
   const [isOpen, setIsOpen] = React.useState(false);
-
-  // Fetch access roles from API
   const { data: accessRoles, isLoading: rolesLoading } = useGetAccessRolesQuery(resourceType);
 
-  // Helper function to get localized role name and description
+  /** Helper function to get localized role name and description */
   const getLocalizedRoleInfo = (roleId: string) => {
     switch (roleId) {
       case 'agent_viewer':
@@ -51,6 +49,21 @@ export default function AccessRolesPicker({
           name: localize('com_ui_role_owner'),
           description: localize('com_ui_role_owner_desc'),
         };
+      case 'promptGroup_viewer':
+        return {
+          name: localize('com_ui_role_viewer'),
+          description: localize('com_ui_role_viewer_desc'),
+        };
+      case 'promptGroup_editor':
+        return {
+          name: localize('com_ui_role_editor'),
+          description: localize('com_ui_role_editor_desc'),
+        };
+      case 'promptGroup_owner':
+        return {
+          name: localize('com_ui_role_owner'),
+          description: localize('com_ui_role_owner_desc'),
+        };
       default:
         return {
           name: localize('com_ui_unknown'),
@@ -59,7 +72,6 @@ export default function AccessRolesPicker({
     }
   };
 
-  // Find the currently selected role
   const selectedRole = accessRoles?.find((role) => role.accessRoleId === selectedRoleId);
   const selectedRoleInfo = selectedRole ? getLocalizedRoleInfo(selectedRole.accessRoleId) : null;
 
