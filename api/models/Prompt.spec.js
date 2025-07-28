@@ -278,7 +278,7 @@ describe('Prompt ACL Permissions', () => {
       // Without explicit permissions, even admin won't have access at this layer
       expect(hasAccess).toBe(false);
 
-      // The actual admin bypass happens in the middleware layer (canAccessPromptResource)
+      // The actual admin bypass happens in the middleware layer (`canAccessPromptViaGroup`/`canAccessPromptGroupResource`)
       // which checks req.user.role === SystemRoles.ADMIN
     });
   });

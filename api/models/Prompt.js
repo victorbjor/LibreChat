@@ -428,16 +428,6 @@ module.exports = {
       throw new Error('Failed to delete the prompt');
     }
 
-    // Remove all ACL entries for this prompt
-    try {
-      await removeAllPermissions({
-        resourceType: 'prompt',
-        resourceId: promptId,
-      });
-    } catch (error) {
-      logger.error('Error removing prompt permissions:', error);
-    }
-
     const remainingPrompts = await Prompt.find({ groupId })
       .select('_id')
       .sort({ createdAt: 1 })

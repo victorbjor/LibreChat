@@ -18,7 +18,6 @@ jest.mock('~/models/Role', () => ({
 
 jest.mock('~/server/middleware', () => ({
   requireJwtAuth: (req, res, next) => next(),
-  canAccessPromptResource: jest.requireActual('~/server/middleware').canAccessPromptResource,
   canAccessPromptViaGroup: jest.requireActual('~/server/middleware').canAccessPromptViaGroup,
   canAccessPromptGroupResource:
     jest.requireActual('~/server/middleware').canAccessPromptGroupResource,
