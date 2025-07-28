@@ -10,8 +10,12 @@ import {
   useToastContext,
 } from '@librechat/client';
 import type { TPrincipal } from 'librechat-data-provider';
-import { useLocalize, useCopyToClipboard } from '~/hooks';
-import { usePeoplePickerPermissions, useResourcePermissionState } from '~/hooks/Sharing';
+import {
+  usePeoplePickerPermissions,
+  useResourcePermissionState,
+  useCopyToClipboard,
+  useLocalize,
+} from '~/hooks';
 import GenericManagePermissionsDialog from './GenericManagePermissionsDialog';
 import PublicSharingToggle from './PublicSharingToggle';
 import AccessRolesPicker from './AccessRolesPicker';
