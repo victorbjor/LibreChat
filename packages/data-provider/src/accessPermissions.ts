@@ -28,12 +28,16 @@ export type TAccessLevel = 'none' | 'viewer' | 'editor' | 'owner';
 /**
  * Permission bit constants for bitwise operations
  */
-export const PERMISSION_BITS = {
-  VIEW: 1, // 001 - Can view and use agent
-  EDIT: 2, // 010 - Can modify agent settings
-  DELETE: 4, // 100 - Can delete agent
-  SHARE: 8, // 1000 - Can share agent with others (future)
-} as const;
+export enum PERMISSION_BITS {
+  /** 001 - Can view and use agent */
+  VIEW = 1,
+  /**  010 - Can modify agent settings */
+  EDIT = 2,
+  /**  100 - Can delete agent */
+  DELETE = 4,
+  /**  1000 - Can share agent with others (future) */
+  SHARE = 8,
+}
 
 /**
  * Standard access role IDs
