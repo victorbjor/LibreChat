@@ -21,14 +21,14 @@ const {
   updateAgent,
   deleteAgent,
   getListAgents,
+  revertAgentVersion,
   updateAgentProjects,
   addAgentResourceFile,
   removeAgentResourceFiles,
   generateActionMetadataHash,
-  revertAgentVersion,
 } = require('./Agent');
-const { getCachedTools } = require('~/server/services/Config');
 const permissionService = require('~/server/services/PermissionService');
+const { getCachedTools } = require('~/server/services/Config');
 const { AclEntry } = require('~/db/models');
 
 /**

@@ -4,6 +4,7 @@ const { generateCheckAccess } = require('@librechat/api');
 const { logger, PermissionBits } = require('@librechat/data-schemas');
 const {
   Permissions,
+  ResourceType,
   PermissionTypes,
   actionDelimiter,
   removeNullishValues,
@@ -36,7 +37,7 @@ router.get('/', async (req, res) => {
     const userId = req.user.id;
     const editableAgentObjectIds = await findAccessibleResources({
       userId,
-      resourceType: 'agent',
+      resourceType: ResourceType.AGENT,
       requiredPermissions: PermissionBits.EDIT,
     });
 

@@ -1,20 +1,25 @@
 const express = require('express');
-const { logger, PermissionBits } = require('@librechat/data-schemas');
 const { generateCheckAccess } = require('@librechat/api');
-const { Permissions, SystemRoles, PermissionTypes } = require('librechat-data-provider');
+const { logger, PermissionBits } = require('@librechat/data-schemas');
 const {
-  getPrompt,
-  getPrompts,
-  savePrompt,
-  deletePrompt,
-  getPromptGroup,
-  getPromptGroups,
+  Permissions,
+  SystemRoles,
+  ResourceType,
+  PermissionTypes,
+  ACCESS_ROLE_IDS,
+} = require('librechat-data-provider');
+const {
+  makePromptProduction,
+  getAllPromptGroups,
   updatePromptGroup,
   deletePromptGroup,
   createPromptGroup,
-  getAllPromptGroups,
-  // updatePromptLabels,
-  makePromptProduction,
+  getPromptGroups,
+  getPromptGroup,
+  deletePrompt,
+  getPrompts,
+  savePrompt,
+  getPrompt,
 } = require('~/models/Prompt');
 const {
   canAccessPromptGroupResource,
@@ -22,10 +27,10 @@ const {
   requireJwtAuth,
 } = require('~/server/middleware');
 const {
-  grantPermission,
+  findPubliclyAccessibleResources,
   getEffectivePermissions,
   findAccessibleResources,
-  findPubliclyAccessibleResources,
+  grantPermission,
 } = require('~/server/services/PermissionService');
 const { getRoleByName } = require('~/models/Role');
 
@@ -92,7 +97,7 @@ router.get('/all', async (req, res) => {
     // Get promptGroup IDs the user has VIEW access to via ACL
     const accessibleIds = await findAccessibleResources({
       userId,
-      resourceType: 'promptGroup',
+      resourceType: ResourceType.PROMPT_GROUP,
       requiredPermissions: PermissionBits.VIEW,
     });
 
@@ -123,13 +128,13 @@ router.get('/groups', async (req, res) => {
     // Get promptGroup IDs the user has VIEW access to via ACL
     const accessibleIds = await findAccessibleResources({
       userId,
-      resourceType: 'promptGroup',
+      resourceType: ResourceType.PROMPT_GROUP,
       requiredPermissions: PermissionBits.VIEW,
     });
 
     // Get publicly accessible promptGroups
     const publiclyAccessibleIds = await findPubliclyAccessibleResources({
-      resourceType: 'promptGroup',
+      resourceType: ResourceType.PROMPT_GROUP,
       requiredPermissions: PermissionBits.VIEW,
     });
 
@@ -185,9 +190,9 @@ const createNewPromptGroup = async (req, res) => {
         await grantPermission({
           principalType: 'user',
           principalId: req.user.id,
-          resourceType: 'promptGroup',
+          resourceType: ResourceType.PROMPT_GROUP,
           resourceId: result.prompt.groupId,
-          accessRoleId: 'promptGroup_owner',
+          accessRoleId: ACCESS_ROLE_IDS.PROMPTGROUP_OWNER,
           grantedBy: req.user.id,
         });
         logger.debug(
@@ -327,7 +332,7 @@ router.get('/', async (req, res) => {
     if (groupId) {
       const permissions = await getEffectivePermissions({
         userId: req.user.id,
-        resourceType: 'promptGroup',
+        resourceType: ResourceType.PROMPT_GROUP,
         resourceId: groupId,
       });
 
