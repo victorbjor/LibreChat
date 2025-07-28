@@ -10,8 +10,8 @@ import { SystemRoles, PermissionTypes, Permissions } from 'librechat-data-provid
 import type { TCreatePrompt, TPrompt, TPromptGroup } from 'librechat-data-provider';
 import {
   useGetPrompts,
-  useCreatePrompt,
   useGetPromptGroup,
+  useAddPromptToGroup,
   useUpdatePromptGroup,
   useMakePromptProduction,
 } from '~/data-provider';
@@ -206,13 +206,12 @@ const PromptForm = () => {
   });
 
   const makeProductionMutation = useMakePromptProduction();
-
-  const createPromptMutation = useCreatePrompt({
+  const addPromptToGroupMutation = useAddPromptToGroup({
     onMutate: (variables) => {
       reset(
         {
           prompt: variables.prompt.prompt,
-          category: variables.group ? variables.group.category : '',
+          category: group?.category || '',
         },
         { keepDirtyValues: true },
       );
@@ -228,8 +227,8 @@ const PromptForm = () => {
 
       reset({
         prompt: data.prompt.prompt,
-        promptName: data.group ? data.group.name : '',
-        category: data.group ? data.group.category : '',
+        promptName: group?.name || '',
+        category: group?.category || '',
       });
     },
   });
@@ -243,10 +242,17 @@ const PromptForm = () => {
       if (!selectedPrompt) {
         return;
       }
+
+      const groupId = selectedPrompt.groupId || group?._id;
+      if (!groupId) {
+        console.error('No groupId available');
+        return;
+      }
+
       const tempPrompt: TCreatePrompt = {
         prompt: {
           type: selectedPrompt.type ?? 'text',
-          groupId: selectedPrompt.groupId ?? '',
+          groupId: groupId,
           prompt: value,
         },
       };
@@ -255,9 +261,10 @@ const PromptForm = () => {
         return;
       }
 
-      createPromptMutation.mutate(tempPrompt);
+      // We're adding to an existing group, so use the addPromptToGroup mutation
+      addPromptToGroupMutation.mutate({ ...tempPrompt, groupId });
     },
-    [selectedPrompt, createPromptMutation],
+    [selectedPrompt, group, addPromptToGroupMutation],
   );
 
   const handleLoadingComplete = useCallback(() => {
