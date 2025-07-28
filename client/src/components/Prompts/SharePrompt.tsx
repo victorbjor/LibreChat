@@ -26,7 +26,7 @@ const SharePrompt = React.memo(
     // The query will be disabled if groupId is empty
     const groupId = group?._id || '';
     const { hasPermission, isLoading: permissionsLoading } = useResourcePermissions(
-      ResourceType.PROMPT_GROUP,
+      ResourceType.PROMPTGROUP,
       groupId,
     );
 
@@ -50,7 +50,7 @@ const SharePrompt = React.memo(
       <GenericGrantAccessDialog
         resourceDbId={groupId}
         resourceName={group.name}
-        resourceType={ResourceType.PROMPT_GROUP}
+        resourceType={ResourceType.PROMPTGROUP}
         disabled={disabled}
       >
         <Button

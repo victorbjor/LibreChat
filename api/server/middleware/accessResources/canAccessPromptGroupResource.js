@@ -49,7 +49,7 @@ const canAccessPromptGroupResource = (options) => {
   }
 
   return canAccessResource({
-    resourceType: ResourceType.PROMPT_GROUP,
+    resourceType: ResourceType.PROMPTGROUP,
     requiredPermission,
     resourceIdParam,
     idResolver: resolvePromptGroupId,

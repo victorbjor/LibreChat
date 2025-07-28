@@ -97,7 +97,7 @@ router.get('/all', async (req, res) => {
     // Get promptGroup IDs the user has VIEW access to via ACL
     const accessibleIds = await findAccessibleResources({
       userId,
-      resourceType: ResourceType.PROMPT_GROUP,
+      resourceType: ResourceType.PROMPTGROUP,
       requiredPermissions: PermissionBits.VIEW,
     });
 
@@ -128,13 +128,13 @@ router.get('/groups', async (req, res) => {
     // Get promptGroup IDs the user has VIEW access to via ACL
     const accessibleIds = await findAccessibleResources({
       userId,
-      resourceType: ResourceType.PROMPT_GROUP,
+      resourceType: ResourceType.PROMPTGROUP,
       requiredPermissions: PermissionBits.VIEW,
     });
 
     // Get publicly accessible promptGroups
     const publiclyAccessibleIds = await findPubliclyAccessibleResources({
-      resourceType: ResourceType.PROMPT_GROUP,
+      resourceType: ResourceType.PROMPTGROUP,
       requiredPermissions: PermissionBits.VIEW,
     });
 
@@ -190,7 +190,7 @@ const createNewPromptGroup = async (req, res) => {
         await grantPermission({
           principalType: 'user',
           principalId: req.user.id,
-          resourceType: ResourceType.PROMPT_GROUP,
+          resourceType: ResourceType.PROMPTGROUP,
           resourceId: result.prompt.groupId,
           accessRoleId: ACCESS_ROLE_IDS.PROMPTGROUP_OWNER,
           grantedBy: req.user.id,
@@ -332,7 +332,7 @@ router.get('/', async (req, res) => {
     if (groupId) {
       const permissions = await getEffectivePermissions({
         userId: req.user.id,
-        resourceType: ResourceType.PROMPT_GROUP,
+        resourceType: ResourceType.PROMPTGROUP,
         resourceId: groupId,
       });
 

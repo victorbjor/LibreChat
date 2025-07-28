@@ -25,8 +25,8 @@ export const RESOURCE_CONFIGS: Record<ResourceType, ResourceConfig> = {
       `Manage permissions for ${name && name !== '' ? `"${name}"` : 'agent'}`,
     getCopyUrlMessage: () => 'Agent URL copied',
   },
-  [ResourceType.PROMPT_GROUP]: {
-    resourceType: ResourceType.PROMPT_GROUP,
+  [ResourceType.PROMPTGROUP]: {
+    resourceType: ResourceType.PROMPTGROUP,
     defaultViewerRoleId: ACCESS_ROLE_IDS.PROMPTGROUP_VIEWER,
     defaultEditorRoleId: ACCESS_ROLE_IDS.PROMPTGROUP_EDITOR,
     defaultOwnerRoleId: ACCESS_ROLE_IDS.PROMPTGROUP_OWNER,

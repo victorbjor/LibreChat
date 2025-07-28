@@ -30,7 +30,7 @@ export type TAccessLevel = 'none' | 'viewer' | 'editor' | 'owner';
  */
 export enum ResourceType {
   AGENT = 'agent',
-  PROMPT_GROUP = 'promptGroup',
+  PROMPTGROUP = 'promptGroup',
 }
 
 /**

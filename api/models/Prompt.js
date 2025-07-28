@@ -239,7 +239,7 @@ const deletePromptGroup = async ({ _id, author, role }) => {
   await removeGroupFromAllProjects(_id);
 
   try {
-    await removeAllPermissions({ resourceType: ResourceType.PROMPT_GROUP, resourceId: _id });
+    await removeAllPermissions({ resourceType: ResourceType.PROMPTGROUP, resourceId: _id });
   } catch (error) {
     logger.error('Error removing promptGroup permissions:', error);
   }
@@ -442,7 +442,7 @@ module.exports = {
       // Remove all ACL entries for the promptGroup when deleting the last prompt
       try {
         await removeAllPermissions({
-          resourceType: ResourceType.PROMPT_GROUP,
+          resourceType: ResourceType.PROMPTGROUP,
           resourceId: groupId,
         });
       } catch (error) {
