@@ -11,9 +11,9 @@ import {
   OGDialogTrigger,
   useToastContext,
 } from '@librechat/client';
-import SelectedPrincipalsList from '../SidePanel/Agents/Sharing/PeoplePicker/SelectedPrincipalsList';
 import { useResourcePermissionState } from '~/hooks/Sharing';
 import PublicSharingToggle from './PublicSharingToggle';
+import { SelectedPrincipalsList } from './PeoplePicker';
 import { cn, removeFocusOutlines } from '~/utils';
 import { useLocalize } from '~/hooks';
 

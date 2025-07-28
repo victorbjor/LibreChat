@@ -13,10 +13,10 @@ import type { TPrincipal } from 'librechat-data-provider';
 import { useLocalize, useCopyToClipboard } from '~/hooks';
 import { usePeoplePickerPermissions, useResourcePermissionState } from '~/hooks/Sharing';
 import GenericManagePermissionsDialog from './GenericManagePermissionsDialog';
-import PeoplePicker from '../SidePanel/Agents/Sharing/PeoplePicker/PeoplePicker';
-import AccessRolesPicker from '../SidePanel/Agents/Sharing/AccessRolesPicker';
 import PublicSharingToggle from './PublicSharingToggle';
+import AccessRolesPicker from './AccessRolesPicker';
 import { cn, removeFocusOutlines } from '~/utils';
+import { PeoplePicker } from './PeoplePicker';
 
 export default function GenericGrantAccessDialog({
   resourceName,

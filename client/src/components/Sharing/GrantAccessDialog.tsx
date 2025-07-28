@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ACCESS_ROLE_IDS, PermissionTypes, Permissions } from 'librechat-data-provider';
 import { Share2Icon, Users, Loader, Shield, Link, CopyCheck } from 'lucide-react';
+import { ACCESS_ROLE_IDS, PermissionTypes, Permissions } from 'librechat-data-provider';
 import {
   useGetResourcePermissionsQuery,
   useUpdateResourcePermissionsMutation,
@@ -18,9 +18,9 @@ import type { TPrincipal } from 'librechat-data-provider';
 import { useLocalize, useCopyToClipboard, useHasAccess } from '~/hooks';
 import ManagePermissionsDialog from './ManagePermissionsDialog';
 import PublicSharingToggle from './PublicSharingToggle';
-import PeoplePicker from './PeoplePicker/PeoplePicker';
 import AccessRolesPicker from './AccessRolesPicker';
 import { cn, removeFocusOutlines } from '~/utils';
+import { PeoplePicker } from './PeoplePicker';
 
 export default function GrantAccessDialog({
   agentName,

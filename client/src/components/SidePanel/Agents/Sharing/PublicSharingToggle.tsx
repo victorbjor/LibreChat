@@ -1,7 +1,7 @@
 import React from 'react';
 import { Globe } from 'lucide-react';
 import { Switch } from '@librechat/client';
-import AccessRolesPicker from './AccessRolesPicker';
+import { AccessRolesPicker } from '~/components/Sharing';
 import { useLocalize } from '~/hooks';
 
 interface PublicSharingToggleProps {
