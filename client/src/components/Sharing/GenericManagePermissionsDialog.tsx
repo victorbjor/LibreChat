@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { TPrincipal } from 'librechat-data-provider';
-import { Settings, Users, Loader, UserCheck, Trash2, Shield } from 'lucide-react';
 import { useGetAccessRolesQuery } from 'librechat-data-provider/react-query';
+import { Settings, Users, Loader, UserCheck, Trash2, Shield } from 'lucide-react';
 import {
   Button,
   OGDialog,
@@ -11,6 +10,7 @@ import {
   OGDialogTrigger,
   useToastContext,
 } from '@librechat/client';
+import type { TPrincipal, ResourceType, ACCESS_ROLE_IDS } from 'librechat-data-provider';
 import { useResourcePermissionState } from '~/hooks/Sharing';
 import PublicSharingToggle from './PublicSharingToggle';
 import { SelectedPrincipalsList } from './PeoplePicker';
@@ -26,8 +26,12 @@ export default function GenericManagePermissionsDialog({
 }: {
   resourceDbId: string;
   resourceName?: string;
-  resourceType: string;
-  onUpdatePermissions?: (shares: TPrincipal[], isPublic: boolean, publicRole: string) => void;
+  resourceType: ResourceType;
+  onUpdatePermissions?: (
+    shares: TPrincipal[],
+    isPublic: boolean,
+    publicRole: ACCESS_ROLE_IDS,
+  ) => void;
   children?: React.ReactNode;
 }) {
   const localize = useLocalize();

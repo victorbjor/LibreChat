@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { ACCESS_ROLE_IDS, TPrincipal } from 'librechat-data-provider';
+import { ACCESS_ROLE_IDS, ResourceType } from 'librechat-data-provider';
 import { Settings, Users, Loader, UserCheck, Trash2, Shield } from 'lucide-react';
 import {
   useGetAccessRolesQuery,
   useGetResourcePermissionsQuery,
   useUpdateResourcePermissionsMutation,
 } from 'librechat-data-provider/react-query';
+import type { TPrincipal } from 'librechat-data-provider';
 import {
   Button,
   OGDialog,
@@ -21,15 +22,19 @@ import { cn, removeFocusOutlines } from '~/utils';
 import { useLocalize } from '~/hooks';
 
 export default function ManagePermissionsDialog({
-  agentDbId,
   agentName,
-  resourceType = 'agent',
+  resourceType = ResourceType.AGENT,
+  agentDbId,
   onUpdatePermissions,
 }: {
   agentDbId: string;
   agentName?: string;
-  resourceType?: string;
-  onUpdatePermissions?: (shares: TPrincipal[], isPublic: boolean, publicRole: string) => void;
+  resourceType?: ResourceType;
+  onUpdatePermissions?: (
+    shares: TPrincipal[],
+    isPublic: boolean,
+    publicRole: ACCESS_ROLE_IDS,
+  ) => void;
 }) {
   const localize = useLocalize();
   const { showToast } = useToastContext();

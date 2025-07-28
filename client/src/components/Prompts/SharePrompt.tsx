@@ -3,6 +3,7 @@ import { Share2Icon } from 'lucide-react';
 import {
   SystemRoles,
   Permissions,
+  ResourceType,
   PermissionTypes,
   PERMISSION_BITS,
 } from 'librechat-data-provider';
@@ -25,7 +26,7 @@ const SharePrompt = React.memo(
     // The query will be disabled if groupId is empty
     const groupId = group?._id || '';
     const { hasPermission, isLoading: permissionsLoading } = useResourcePermissions(
-      'promptGroup',
+      ResourceType.PROMPT_GROUP,
       groupId,
     );
 
@@ -49,7 +50,7 @@ const SharePrompt = React.memo(
       <GenericGrantAccessDialog
         resourceDbId={groupId}
         resourceName={group.name}
-        resourceType="promptGroup"
+        resourceType={ResourceType.PROMPT_GROUP}
         disabled={disabled}
       >
         <Button

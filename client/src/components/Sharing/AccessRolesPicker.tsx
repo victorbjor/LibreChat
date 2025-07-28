@@ -2,7 +2,7 @@ import React from 'react';
 import * as Ariakit from '@ariakit/react';
 import { ChevronDown } from 'lucide-react';
 import { DropdownPopup } from '@librechat/client';
-import { ACCESS_ROLE_IDS } from 'librechat-data-provider';
+import { ACCESS_ROLE_IDS, ResourceType } from 'librechat-data-provider';
 import { useGetAccessRolesQuery } from 'librechat-data-provider/react-query';
 import type { AccessRole } from 'librechat-data-provider';
 import type * as t from '~/common';
@@ -10,14 +10,14 @@ import { cn, getRoleLocalizationKeys } from '~/utils';
 import { useLocalize } from '~/hooks';
 
 interface AccessRolesPickerProps {
-  resourceType?: string;
+  resourceType?: ResourceType;
   selectedRoleId?: ACCESS_ROLE_IDS;
   onRoleChange: (roleId: ACCESS_ROLE_IDS) => void;
   className?: string;
 }
 
 export default function AccessRolesPicker({
-  resourceType = 'agent',
+  resourceType = ResourceType.AGENT,
   selectedRoleId = ACCESS_ROLE_IDS.AGENT_VIEWER,
   onRoleChange,
   className = '',

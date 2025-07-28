@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Share2Icon, Users, Loader, Shield, Link, CopyCheck } from 'lucide-react';
-import { ACCESS_ROLE_IDS, PermissionTypes, Permissions } from 'librechat-data-provider';
+import {
+  Permissions,
+  ResourceType,
+  PermissionTypes,
+  ACCESS_ROLE_IDS,
+} from 'librechat-data-provider';
 import {
   useGetResourcePermissionsQuery,
   useUpdateResourcePermissionsMutation,
@@ -25,15 +30,15 @@ import { PeoplePicker } from './PeoplePicker';
 export default function GrantAccessDialog({
   agentName,
   onGrantAccess,
-  resourceType = 'agent',
+  resourceType = ResourceType.AGENT,
   agentDbId,
   agentId,
 }: {
   agentDbId?: string | null;
   agentId?: string | null;
   agentName?: string;
-  onGrantAccess?: (shares: TPrincipal[], isPublic: boolean, publicRole: string) => void;
-  resourceType?: string;
+  onGrantAccess?: (shares: TPrincipal[], isPublic: boolean, publicRole: ACCESS_ROLE_IDS) => void;
+  resourceType?: ResourceType;
 }) {
   const localize = useLocalize();
   const { showToast } = useToastContext();
@@ -97,7 +102,7 @@ export default function GrantAccessDialog({
   const currentPublicRole = permissionsData?.publicAccessRoleId || ACCESS_ROLE_IDS.AGENT_VIEWER;
 
   const [isPublic, setIsPublic] = useState(false);
-  const [publicRole, setPublicRole] = useState<string>(ACCESS_ROLE_IDS.AGENT_VIEWER);
+  const [publicRole, setPublicRole] = useState<ACCESS_ROLE_IDS>(ACCESS_ROLE_IDS.AGENT_VIEWER);
 
   useEffect(() => {
     if (permissionsData && isModalOpen) {

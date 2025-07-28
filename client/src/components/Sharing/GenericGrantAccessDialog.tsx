@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ACCESS_ROLE_IDS, ResourceType } from 'librechat-data-provider';
 import { Share2Icon, Users, Loader, Shield, Link, CopyCheck } from 'lucide-react';
 import {
   Button,
@@ -34,8 +35,8 @@ export default function GenericGrantAccessDialog({
   resourceDbId?: string | null;
   resourceId?: string | null;
   resourceName?: string;
-  resourceType: string;
-  onGrantAccess?: (shares: TPrincipal[], isPublic: boolean, publicRole: string) => void;
+  resourceType: ResourceType;
+  onGrantAccess?: (shares: TPrincipal[], isPublic: boolean, publicRole: ACCESS_ROLE_IDS) => void;
   disabled?: boolean;
   children?: React.ReactNode;
 }) {
@@ -59,8 +60,8 @@ export default function GenericGrantAccessDialog({
   } = useResourcePermissionState(resourceType, resourceDbId, isModalOpen);
 
   const [newShares, setNewShares] = useState<TPrincipal[]>([]);
-  const [defaultPermissionId, setDefaultPermissionId] = useState<string>(
-    config?.defaultViewerRoleId ?? '',
+  const [defaultPermissionId, setDefaultPermissionId] = useState<ACCESS_ROLE_IDS | undefined>(
+    config?.defaultViewerRoleId,
   );
 
   const resourceUrl = config?.getResourceUrl ? config?.getResourceUrl(resourceId || '') : '';

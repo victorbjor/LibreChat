@@ -1,10 +1,10 @@
-import { ACCESS_ROLE_IDS } from 'librechat-data-provider';
+import { ACCESS_ROLE_IDS, ResourceType } from 'librechat-data-provider';
 
 export interface ResourceConfig {
-  resourceType: string;
-  defaultViewerRoleId: string;
-  defaultEditorRoleId: string;
-  defaultOwnerRoleId: string;
+  resourceType: ResourceType;
+  defaultViewerRoleId: ACCESS_ROLE_IDS;
+  defaultEditorRoleId: ACCESS_ROLE_IDS;
+  defaultOwnerRoleId: ACCESS_ROLE_IDS;
   getResourceUrl?: (resourceId: string) => string;
   getResourceName: (resourceName?: string) => string;
   getShareMessage: (resourceName?: string) => string;
@@ -12,9 +12,9 @@ export interface ResourceConfig {
   getCopyUrlMessage: () => string;
 }
 
-export const RESOURCE_CONFIGS: Record<string, ResourceConfig> = {
-  agent: {
-    resourceType: 'agent',
+export const RESOURCE_CONFIGS: Record<ResourceType, ResourceConfig> = {
+  [ResourceType.AGENT]: {
+    resourceType: ResourceType.AGENT,
     defaultViewerRoleId: ACCESS_ROLE_IDS.AGENT_VIEWER,
     defaultEditorRoleId: ACCESS_ROLE_IDS.AGENT_EDITOR,
     defaultOwnerRoleId: ACCESS_ROLE_IDS.AGENT_OWNER,
@@ -25,8 +25,8 @@ export const RESOURCE_CONFIGS: Record<string, ResourceConfig> = {
       `Manage permissions for ${name && name !== '' ? `"${name}"` : 'agent'}`,
     getCopyUrlMessage: () => 'Agent URL copied',
   },
-  promptGroup: {
-    resourceType: 'promptGroup',
+  [ResourceType.PROMPT_GROUP]: {
+    resourceType: ResourceType.PROMPT_GROUP,
     defaultViewerRoleId: ACCESS_ROLE_IDS.PROMPTGROUP_VIEWER,
     defaultEditorRoleId: ACCESS_ROLE_IDS.PROMPTGROUP_EDITOR,
     defaultOwnerRoleId: ACCESS_ROLE_IDS.PROMPTGROUP_OWNER,
@@ -38,6 +38,6 @@ export const RESOURCE_CONFIGS: Record<string, ResourceConfig> = {
   },
 };
 
-export const getResourceConfig = (resourceType: string): ResourceConfig | undefined => {
+export const getResourceConfig = (resourceType: ResourceType): ResourceConfig | undefined => {
   return RESOURCE_CONFIGS[resourceType];
 };

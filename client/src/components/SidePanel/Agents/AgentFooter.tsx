@@ -3,6 +3,7 @@ import { useWatch, useFormContext } from 'react-hook-form';
 import {
   SystemRoles,
   Permissions,
+  ResourceType,
   PermissionTypes,
   PERMISSION_BITS,
 } from 'librechat-data-provider';
@@ -84,7 +85,7 @@ export default function AgentFooter({
               resourceDbId={agent?._id}
               resourceId={agent_id}
               resourceName={agent?.name ?? ''}
-              resourceType="agent"
+              resourceType={ResourceType.AGENT}
             />
           )}
         {agent && agent.author === user?.id && <DuplicateAgent agent_id={agent_id} />}
