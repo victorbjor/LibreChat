@@ -12,8 +12,8 @@ import {
   useToastContext,
 } from '@librechat/client';
 import SelectedPrincipalsList from '../SidePanel/Agents/Sharing/PeoplePicker/SelectedPrincipalsList';
-import PublicSharingToggle from './PublicSharingToggle';
 import { useResourcePermissionState } from '~/hooks/Sharing';
+import PublicSharingToggle from './PublicSharingToggle';
 import { cn, removeFocusOutlines } from '~/utils';
 import { useLocalize } from '~/hooks';
 
@@ -35,7 +35,6 @@ export default function GenericManagePermissionsDialog({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Use shared hook for permission state
   const {
     config,
     permissionsData,

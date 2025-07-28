@@ -15,6 +15,7 @@ export * from './messages';
 export * from './languages';
 export * from './endpoints';
 export * from './resources';
+export * from './roles';
 export * from './localStorage';
 export * from './promptGroups';
 export { default as cn } from './cn';
