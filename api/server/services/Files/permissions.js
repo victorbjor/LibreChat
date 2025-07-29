@@ -1,5 +1,5 @@
 const { logger } = require('@librechat/data-schemas');
-const { PERMISSION_BITS } = require('librechat-data-provider');
+const { PERMISSION_BITS, ResourceType } = require('librechat-data-provider');
 const { checkPermission } = require('~/server/services/PermissionService');
 const { getAgent } = require('~/models/Agent');
 
@@ -32,7 +32,7 @@ const hasAccessToFilesViaAgent = async (userId, fileIds, agentId) => {
     // Check if user has at least VIEW permission on the agent
     const hasViewPermission = await checkPermission({
       userId,
-      resourceType: 'agent',
+      resourceType: ResourceType.AGENT,
       resourceId: agent._id,
       requiredPermission: PERMISSION_BITS.VIEW,
     });
@@ -44,7 +44,7 @@ const hasAccessToFilesViaAgent = async (userId, fileIds, agentId) => {
     // Check if user has EDIT permission (which would indicate collaborative access)
     const hasEditPermission = await checkPermission({
       userId,
-      resourceType: 'agent',
+      resourceType: ResourceType.AGENT,
       resourceId: agent._id,
       requiredPermission: PERMISSION_BITS.EDIT,
     });

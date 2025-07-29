@@ -1,4 +1,5 @@
 const express = require('express');
+const { ResourceType } = require('librechat-data-provider');
 const { PermissionBits } = require('@librechat/data-schemas');
 const {
   getUserEffectivePermissions,
@@ -53,15 +54,15 @@ router.put(
     // Define resource-specific middleware based on resourceType
     let middleware;
 
-    if (resourceType === 'agent') {
+    if (resourceType === ResourceType.AGENT) {
       middleware = canAccessResource({
-        resourceType: 'agent',
+        resourceType: ResourceType.AGENT,
         requiredPermission: PermissionBits.SHARE,
         resourceIdParam: 'resourceId',
       });
-    } else if (resourceType === 'promptGroup') {
+    } else if (resourceType === ResourceType.PROMPTGROUP) {
       middleware = canAccessResource({
-        resourceType: 'promptGroup',
+        resourceType: ResourceType.PROMPTGROUP,
         requiredPermission: PermissionBits.SHARE,
         resourceIdParam: 'resourceId',
       });

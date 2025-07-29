@@ -14,6 +14,7 @@ const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
 const { agentSchema } = require('@librechat/data-schemas');
 const { MongoMemoryServer } = require('mongodb-memory-server');
+const { ACCESS_ROLE_IDS, ResourceType } = require('librechat-data-provider');
 const {
   getAgent,
   loadAgent,
@@ -423,10 +424,10 @@ describe('models/Agent', () => {
 
       // Create necessary access roles for agents
       await AccessRole.create({
-        accessRoleId: 'agent_owner',
+        accessRoleId: ACCESS_ROLE_IDS.AGENT_OWNER,
         name: 'Owner',
         description: 'Full control over agents',
-        resourceType: 'agent',
+        resourceType: ResourceType.AGENT,
         permBits: 15, // VIEW | EDIT | DELETE | SHARE
       });
     }, 20000);
@@ -501,15 +502,15 @@ describe('models/Agent', () => {
       await permissionService.grantPermission({
         principalType: 'user',
         principalId: authorId,
-        resourceType: 'agent',
+        resourceType: ResourceType.AGENT,
         resourceId: agent._id,
-        accessRoleId: 'agent_owner',
+        accessRoleId: ACCESS_ROLE_IDS.AGENT_OWNER,
         grantedBy: authorId,
       });
 
       // Verify ACL entry exists
       const aclEntriesBefore = await AclEntry.find({
-        resourceType: 'agent',
+        resourceType: ResourceType.AGENT,
         resourceId: agent._id,
       });
       expect(aclEntriesBefore).toHaveLength(1);
@@ -523,7 +524,7 @@ describe('models/Agent', () => {
 
       // Verify ACL entries are removed
       const aclEntriesAfter = await AclEntry.find({
-        resourceType: 'agent',
+        resourceType: ResourceType.AGENT,
         resourceId: agent._id,
       });
       expect(aclEntriesAfter).toHaveLength(0);

@@ -50,7 +50,7 @@ const validateResourceType = (resourceType) => {
  * @param {string|mongoose.Types.ObjectId|null} params.principalId - The ID of the principal (null for 'public')
  * @param {string} params.resourceType - Type of resource (e.g., 'agent')
  * @param {string|mongoose.Types.ObjectId} params.resourceId - The ID of the resource
- * @param {string} params.accessRoleId - The ID of the role (e.g., 'agent_viewer', 'agent_editor')
+ * @param {string} params.accessRoleId - The ID of the role (e.g., ACCESS_ROLE_IDS.AGENT_VIEWER, ACCESS_ROLE_IDS.AGENT_EDITOR)
  * @param {string|mongoose.Types.ObjectId} params.grantedBy - User ID granting the permission
  * @param {mongoose.ClientSession} [params.session] - Optional MongoDB session for transactions
  * @returns {Promise<Object>} The created or updated ACL entry

@@ -1,8 +1,8 @@
+const mongoose = require('mongoose');
 const { ObjectId } = require('mongodb');
 const { MongoMemoryServer } = require('mongodb-memory-server');
-const mongoose = require('mongoose');
 const { logger, PermissionBits } = require('@librechat/data-schemas');
-const { Constants } = require('librechat-data-provider');
+const { Constants, ResourceType, ACCESS_ROLE_IDS } = require('librechat-data-provider');
 
 // Mock the config/connect module to prevent connection attempts during tests
 jest.mock('../../config/connect', () => jest.fn().mockResolvedValue(true));
@@ -49,27 +49,27 @@ describe('PromptGroup Migration Script', () => {
 
     // Create promptGroup access roles
     ownerRole = await AccessRole.create({
-      accessRoleId: 'promptGroup_owner',
+      accessRoleId: ACCESS_ROLE_IDS.PROMPTGROUP_OWNER,
       name: 'Owner',
       description: 'Full control over promptGroups',
-      resourceType: 'promptGroup',
+      resourceType: ResourceType.PROMPTGROUP,
       permBits:
         PermissionBits.VIEW | PermissionBits.EDIT | PermissionBits.DELETE | PermissionBits.SHARE,
     });
 
     viewerRole = await AccessRole.create({
-      accessRoleId: 'promptGroup_viewer',
+      accessRoleId: ACCESS_ROLE_IDS.PROMPTGROUP_VIEWER,
       name: 'Viewer',
       description: 'Can view promptGroups',
-      resourceType: 'promptGroup',
+      resourceType: ResourceType.PROMPTGROUP,
       permBits: PermissionBits.VIEW,
     });
 
     await AccessRole.create({
-      accessRoleId: 'promptGroup_editor',
+      accessRoleId: ACCESS_ROLE_IDS.PROMPTGROUP_EDITOR,
       name: 'Editor',
       description: 'Can view and edit promptGroups',
-      resourceType: 'promptGroup',
+      resourceType: ResourceType.PROMPTGROUP,
       permBits: PermissionBits.VIEW | PermissionBits.EDIT,
     });
 
@@ -103,7 +103,7 @@ describe('PromptGroup Migration Script', () => {
     });
 
     // Create private prompt group (not in any project)
-    const privatePromptGroup = await PromptGroup.create({
+    await PromptGroup.create({
       name: 'Private Group',
       author: testOwner._id,
       authorName: testOwner.name,
@@ -151,7 +151,7 @@ describe('PromptGroup Migration Script', () => {
 
     // Check global promptGroup permissions
     const globalOwnerEntry = await AclEntry.findOne({
-      resourceType: 'promptGroup',
+      resourceType: ResourceType.PROMPTGROUP,
       resourceId: globalPromptGroup._id,
       principalType: 'user',
       principalId: testOwner._id,
@@ -160,7 +160,7 @@ describe('PromptGroup Migration Script', () => {
     expect(globalOwnerEntry.permBits).toBe(ownerRole.permBits);
 
     const globalPublicEntry = await AclEntry.findOne({
-      resourceType: 'promptGroup',
+      resourceType: ResourceType.PROMPTGROUP,
       resourceId: globalPromptGroup._id,
       principalType: 'public',
     });
@@ -169,7 +169,7 @@ describe('PromptGroup Migration Script', () => {
 
     // Check private promptGroup permissions
     const privateOwnerEntry = await AclEntry.findOne({
-      resourceType: 'promptGroup',
+      resourceType: ResourceType.PROMPTGROUP,
       resourceId: privatePromptGroup._id,
       principalType: 'user',
       principalId: testOwner._id,
@@ -178,7 +178,7 @@ describe('PromptGroup Migration Script', () => {
     expect(privateOwnerEntry.permBits).toBe(ownerRole.permBits);
 
     const privatePublicEntry = await AclEntry.findOne({
-      resourceType: 'promptGroup',
+      resourceType: ResourceType.PROMPTGROUP,
       resourceId: privatePromptGroup._id,
       principalType: 'public',
     });
@@ -206,7 +206,7 @@ describe('PromptGroup Migration Script', () => {
       principalType: 'user',
       principalId: testOwner._id,
       principalModel: 'User',
-      resourceType: 'promptGroup',
+      resourceType: ResourceType.PROMPTGROUP,
       resourceId: promptGroup1._id,
       permBits: ownerRole.permBits,
       roleId: ownerRole._id,
@@ -222,7 +222,7 @@ describe('PromptGroup Migration Script', () => {
 
     // Verify promptGroup2 now has permissions
     const group2Entry = await AclEntry.findOne({
-      resourceType: 'promptGroup',
+      resourceType: ResourceType.PROMPTGROUP,
       resourceId: promptGroup2._id,
     });
     expect(group2Entry).toBeTruthy();
@@ -259,7 +259,7 @@ describe('PromptGroup Migration Script', () => {
 
     // Verify the promptGroup has permissions
     const groupEntry = await AclEntry.findOne({
-      resourceType: 'promptGroup',
+      resourceType: ResourceType.PROMPTGROUP,
       resourceId: promptGroup._id,
     });
     expect(groupEntry).toBeTruthy();

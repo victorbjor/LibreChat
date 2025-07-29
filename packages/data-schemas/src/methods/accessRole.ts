@@ -1,3 +1,4 @@
+import { ACCESS_ROLE_IDS, ResourceType } from 'librechat-data-provider';
 import type { Model, Types, DeleteResult } from 'mongoose';
 import { RoleBits, PermissionBits } from '~/common';
 import type { IAccessRole } from '~/types';
@@ -104,45 +105,45 @@ export function createAccessRoleMethods(mongoose: typeof import('mongoose')) {
     const AccessRole = mongoose.models.AccessRole as Model<IAccessRole>;
     const defaultRoles = [
       {
-        accessRoleId: 'agent_viewer',
+        accessRoleId: ACCESS_ROLE_IDS.AGENT_VIEWER,
         name: 'com_ui_role_viewer',
         description: 'com_ui_role_viewer_desc',
-        resourceType: 'agent',
+        resourceType: ResourceType.AGENT,
         permBits: RoleBits.VIEWER,
       },
       {
-        accessRoleId: 'agent_editor',
+        accessRoleId: ACCESS_ROLE_IDS.AGENT_EDITOR,
         name: 'com_ui_role_editor',
         description: 'com_ui_role_editor_desc',
-        resourceType: 'agent',
+        resourceType: ResourceType.AGENT,
         permBits: RoleBits.EDITOR,
       },
       {
-        accessRoleId: 'agent_owner',
+        accessRoleId: ACCESS_ROLE_IDS.AGENT_OWNER,
         name: 'com_ui_role_owner',
         description: 'com_ui_role_owner_desc',
-        resourceType: 'agent',
+        resourceType: ResourceType.AGENT,
         permBits: RoleBits.OWNER,
       },
       {
-        accessRoleId: 'promptGroup_viewer',
+        accessRoleId: ACCESS_ROLE_IDS.PROMPTGROUP_VIEWER,
         name: 'com_ui_role_viewer',
         description: 'com_ui_role_viewer_desc',
-        resourceType: 'promptGroup',
+        resourceType: ResourceType.PROMPTGROUP,
         permBits: RoleBits.VIEWER,
       },
       {
-        accessRoleId: 'promptGroup_editor',
+        accessRoleId: ACCESS_ROLE_IDS.PROMPTGROUP_EDITOR,
         name: 'com_ui_role_editor',
         description: 'com_ui_role_editor_desc',
-        resourceType: 'promptGroup',
+        resourceType: ResourceType.PROMPTGROUP,
         permBits: RoleBits.EDITOR,
       },
       {
-        accessRoleId: 'promptGroup_owner',
+        accessRoleId: ACCESS_ROLE_IDS.PROMPTGROUP_OWNER,
         name: 'com_ui_role_owner',
         description: 'com_ui_role_owner_desc',
-        resourceType: 'promptGroup',
+        resourceType: ResourceType.PROMPTGROUP,
         permBits: RoleBits.OWNER,
       },
     ];
