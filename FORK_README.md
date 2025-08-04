@@ -108,7 +108,7 @@ git push origin main
 ## Monitoring
 
 ### Health Checks
-- `/api/health` - Application health
+- `/health` - Application health
 - `/api/status` - Detailed status
 - `/api/metrics` - Performance metrics
 
