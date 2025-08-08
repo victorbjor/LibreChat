@@ -315,6 +315,13 @@ endpoints:
 # # See the Custom Configuration Guide for more information on Assistants Config:
 # # https://www.librechat.ai/docs/configuration/librechat_yaml/object_structure/assistants_endpoint
 
+# n8n Integration configuration
+# n8n:
+#   # n8n instance URL (required for integration)
+#   url: "http://localhost:5678"
+#   # Enable n8n integration (default: false)
+#   enabled: true
+
 # Memory configuration for user memories
 # memory:
 #   # (optional) Disable memory functionality

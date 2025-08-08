@@ -101,6 +101,24 @@ function AccountSettings() {
             {localize('com_nav_help_faq')}
           </Select.SelectItem>
         )}
+        {process.env.N8N_URL && (
+          <Select.SelectItem
+            value=""
+            onClick={() => {
+              // Redirect to n8n integration endpoint which will handle the token generation and redirect
+              const n8nUrl = process.env.N8N_URL || 'http://localhost:5678';
+              const returnTo = window.location.href;
+              const redirectUrl = `${window.location.origin}/api/n8n-integration/redirect?returnTo=${encodeURIComponent(returnTo)}`;
+              window.open(redirectUrl, '_blank');
+            }}
+            className="select-item text-sm"
+          >
+            <svg className="icon-md" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+            {localize('com_nav_n8n_workflows')}
+          </Select.SelectItem>
+        )}
         <Select.SelectItem
           value=""
           onClick={() => setShowSettings(true)}
