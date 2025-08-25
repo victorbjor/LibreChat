@@ -1,3 +1,4 @@
+const accessPermissions = require('./accessPermissions');
 const assistants = require('./assistants');
 const categories = require('./categories');
 const tokenizer = require('./tokenizer');
@@ -29,6 +30,7 @@ const mcp = require('./mcp');
 const n8nIntegration = require('./n8n-integration');
 
 module.exports = {
+  mcp,
   edit,
   auth,
   keys,
@@ -56,6 +58,6 @@ module.exports = {
   assistants,
   categories,
   staticRoute,
-  mcp,
+  accessPermissions,
   n8nIntegration,
 };
