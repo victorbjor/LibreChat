@@ -98,7 +98,7 @@ export function useMCPSelect({ conversationId }: UseMCPSelectOptions) {
 
   const [isPinned, setIsPinned] = useLocalStorage<boolean>(
     `${LocalStorageKeys.PIN_MCP_}${key}`,
-    true,
+    startupConfig?.interface?.defaultPinMcp ?? true,
   );
 
   useEffect(() => {
