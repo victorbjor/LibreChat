@@ -7,6 +7,9 @@ const {
   getAzureCredentials,
   createHandleLLMNewToken,
 } = require('@librechat/api');
+
+// Import Entra ID utilities separately to avoid import issues
+const { shouldUseEntraId, createEntraIdCredential, createEntraIdAzureOptions, validateEntraIdConfiguration } = require('@librechat/api');
 const { getUserKeyValues, checkUserKeyExpiry } = require('~/server/services/UserService');
 const OpenAIClient = require('~/app/clients/OpenAIClient');
 
@@ -100,17 +103,64 @@ const initializeClient = async ({
     clientOptions.dropParams = azureConfig.groupMap[groupName].dropParams;
     clientOptions.forcePrompt = azureConfig.groupMap[groupName].forcePrompt;
 
-    apiKey = azureOptions.azureOpenAIApiKey;
-    clientOptions.azure = !serverless && azureOptions;
+    // Check if Entra ID authentication should be used
+    if (shouldUseEntraId()) {
+      const validation = validateEntraIdConfiguration();
+      if (!validation.isValid) {
+        throw new Error(`Entra ID authentication configuration error: ${validation.error}`);
+      }
+
+      // For Entra ID authentication, we don't need an API key
+      // The credential will be used for authentication instead
+      apiKey = ''; // Empty string as placeholder for Entra ID
+      clientOptions.azure = !serverless ? createEntraIdAzureOptions(azureOptions) : undefined;
+      
+      // Add Entra ID credential to client options
+      clientOptions.azureCredential = createEntraIdCredential();
+    } else {
+      // Traditional API key authentication
+      apiKey = azureOptions.azureOpenAIApiKey;
+      clientOptions.azure = !serverless && azureOptions;
+    }
+
     if (serverless === true) {
       clientOptions.defaultQuery = azureOptions.azureOpenAIApiVersion
         ? { 'api-version': azureOptions.azureOpenAIApiVersion }
         : undefined;
-      clientOptions.headers['api-key'] = apiKey;
+
+      if (!clientOptions.headers) {
+        clientOptions.headers = {};
+      }
+      
+      // For serverless, we still need the API key in headers even with Entra ID
+      if (shouldUseEntraId()) {
+        // For Entra ID with serverless, we need to get a token and use it as the API key
+        const credential = createEntraIdCredential();
+        const tokenResponse = await credential.getToken('https://cognitiveservices.azure.com/.default');
+        clientOptions.headers['api-key'] = tokenResponse?.token || '';
+      } else {
+        clientOptions.headers['api-key'] = apiKey;
+      }
     }
   } else if (isAzureOpenAI) {
-    clientOptions.azure = userProvidesKey ? JSON.parse(userValues.apiKey) : getAzureCredentials();
-    apiKey = clientOptions.azure.azureOpenAIApiKey;
+    // Handle legacy Azure configuration without group config
+    if (shouldUseEntraId()) {
+      const validation = validateEntraIdConfiguration();
+      if (!validation.isValid) {
+        throw new Error(`Entra ID authentication configuration error: ${validation.error}`);
+      }
+
+      const baseCredentials = userProvidesKey && userValues?.apiKey 
+        ? JSON.parse(userValues.apiKey) 
+        : getAzureCredentials();
+      
+      apiKey = ''; // Empty string as placeholder for Entra ID
+      clientOptions.azure = createEntraIdAzureOptions(baseCredentials);
+      clientOptions.azureCredential = createEntraIdCredential();
+    } else {
+      clientOptions.azure = userProvidesKey ? JSON.parse(userValues.apiKey) : getAzureCredentials();
+      apiKey = clientOptions.azure.azureOpenAIApiKey;
+    }
   }
 
   /** @type {undefined | TBaseEndpoint} */
@@ -126,16 +176,19 @@ const initializeClient = async ({
     clientOptions.streamRate = allConfig.streamRate;
   }
 
-  if (userProvidesKey & !apiKey) {
-    throw new Error(
-      JSON.stringify({
-        type: ErrorTypes.NO_USER_KEY,
-      }),
-    );
-  }
+  // Skip API key validation for Entra ID authentication
+  if (!shouldUseEntraId()) {
+    if (userProvidesKey & !apiKey) {
+      throw new Error(
+        JSON.stringify({
+          type: ErrorTypes.NO_USER_KEY,
+        }),
+      );
+    }
 
-  if (!apiKey) {
-    throw new Error(`${endpoint} API Key not provided.`);
+    if (!apiKey) {
+      throw new Error(`${endpoint} API Key not provided.`);
+    }
   }
 
   if (optionsOnly) {

@@ -5,6 +5,7 @@ import type { BindToolsInput } from '@langchain/core/language_models/chat_models
 import type { OpenAIClientOptions, Providers } from '@librechat/agents';
 import type { AzureOptions } from './azure';
 import type { AppConfig } from './config';
+import type { DefaultAzureCredential } from '@azure/identity';
 
 export type OpenAIParameters = z.infer<typeof openAISchema>;
 
@@ -19,6 +20,7 @@ export interface OpenAIConfigOptions {
   headers?: Record<string, string>;
   proxy?: string;
   azure?: AzureOptions;
+  azureCredential?: DefaultAzureCredential;
   streaming?: boolean;
   addParams?: Record<string, unknown>;
   dropParams?: string[];

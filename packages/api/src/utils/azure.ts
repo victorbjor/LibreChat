@@ -88,6 +88,14 @@ export const getAzureCredentials = (): AzureOptions => {
 };
 
 /**
+ * Checks if Entra ID authentication should be used instead of API keys.
+ * @returns True if Entra ID authentication is enabled.
+ */
+export const shouldUseEntraId = (): boolean => {
+  return process.env.AZURE_OPENAI_USE_ENTRA_ID === 'true';
+};
+
+/**
  * Constructs a URL by replacing placeholders in the baseURL with values from the azure object.
  * It specifically looks for '${INSTANCE_NAME}' and '${DEPLOYMENT_NAME}' within the baseURL and replaces
  * them with 'azureOpenAIApiInstanceName' and 'azureOpenAIApiDeploymentName' from the azure object.
