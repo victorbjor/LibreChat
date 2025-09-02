@@ -18,7 +18,6 @@ Successfully implemented Entra ID (Azure AD) authentication for Azure OpenAI ser
 - **New Files Created:**
   - `packages/api/src/utils/entraId.ts` - Core Entra ID authentication utilities
   - `packages/api/src/utils/entraId.spec.ts` - Unit tests for Entra ID functionality
-  - `ENTRA_ID_AUTHENTICATION.md` - Comprehensive documentation
   - `IMPLEMENTATION_SUMMARY.md` - This summary
 
 - **Modified Files:**
@@ -140,10 +139,10 @@ npm run dev
 ## 📚 Documentation
 
 ### **Created Documentation**
-- `ENTRA_ID_AUTHENTICATION.md` - Comprehensive feature documentation
 - `IMPLEMENTATION_SUMMARY.md` - This implementation summary
 - Inline code documentation and JSDoc comments
 - TypeScript type definitions
+- Documentation consolidated into existing Azure authentication guides
 
 ## 🎯 Benefits Achieved
 
