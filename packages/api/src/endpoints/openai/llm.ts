@@ -8,6 +8,7 @@ import type * as t from '~/types';
 import { sanitizeModelName, constructAzureURL } from '~/utils/azure';
 import { createFetch } from '~/utils/generators';
 import { isEnabled } from '~/utils/common';
+import { shouldUseEntraId } from '~/utils/azure';
 
 type Fetch = (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
 
@@ -213,10 +214,17 @@ export function getOpenAIConfig(
       delete llmConfig.azureOpenAIApiKey;
       llmConfig.apiKey = apiKey;
 
-      configOptions.defaultHeaders = {
-        ...configOptions.defaultHeaders,
-        'api-key': apiKey,
-      };
+      if (shouldUseEntraId()) {
+        configOptions.defaultHeaders = {
+          ...configOptions.defaultHeaders,
+          Authorization: `Bearer ${apiKey}`,
+        };
+      } else {
+        configOptions.defaultHeaders = {
+          ...configOptions.defaultHeaders,
+          'api-key': apiKey,
+        };
+      }
       configOptions.defaultQuery = {
         ...configOptions.defaultQuery,
         'api-version': configOptions.defaultQuery?.['api-version'] ?? 'preview',

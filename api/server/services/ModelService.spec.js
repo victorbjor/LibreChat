@@ -150,6 +150,20 @@ describe('getOpenAIModels', () => {
     expect(models).toEqual(expect.arrayContaining(['azure-model', 'azure-model-2']));
   });
 
+  it('returns `AZURE_OPENAI_MODELS` immediately when set for Azure (avoiding API call)', async () => {
+    process.env.AZURE_OPENAI_MODELS = 'gpt-4,gpt-3.5-turbo,text-davinci-003';
+    
+    // Mock axios to ensure it's not called
+    const axiosSpy = jest.spyOn(axios, 'get');
+    
+    const models = await getOpenAIModels({ azure: true });
+    
+    expect(models).toEqual(['gpt-4', 'gpt-3.5-turbo', 'text-davinci-003']);
+    expect(axiosSpy).not.toHaveBeenCalled();
+    
+    axiosSpy.mockRestore();
+  });
+
   it('returns `PLUGIN_MODELS` with `plugins` flag (and fetch fails)', async () => {
     process.env.PLUGIN_MODELS = 'plugins-model,plugins-model-2';
     const models = await getOpenAIModels({ plugins: true });

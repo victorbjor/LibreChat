@@ -428,4 +428,141 @@ describe('initializeClient', () => {
     expect(result.openAIApiKey).toBe('test');
     expect(result.client.options.reverseProxyUrl).toBe('https://user-provided-url.com');
   });
+
+  // Entra ID Authentication Tests
+  describe('Entra ID Authentication', () => {
+    let mockShouldUseEntraId, mockCreateEntraIdCredential, mockCreateEntraIdAzureOptions, mockValidateEntraIdConfiguration;
+
+    beforeEach(() => {
+      // Mock the Entra ID utilities
+      jest.doMock('@librechat/api', () => ({
+        shouldUseEntraId: jest.fn(),
+        createEntraIdCredential: jest.fn(),
+        createEntraIdAzureOptions: jest.fn(),
+        validateEntraIdConfiguration: jest.fn(),
+      }));
+
+      // Get the mocked functions
+      const entraIdModule = require('@librechat/api');
+      mockShouldUseEntraId = entraIdModule.shouldUseEntraId;
+      mockCreateEntraIdCredential = entraIdModule.createEntraIdCredential;
+      mockCreateEntraIdAzureOptions = entraIdModule.createEntraIdAzureOptions;
+      mockValidateEntraIdConfiguration = entraIdModule.validateEntraIdConfiguration;
+    });
+
+    test('should use Entra ID credential when AZURE_OPENAI_USE_ENTRA_ID is true', async () => {
+      mockShouldUseEntraId.mockReturnValue(true);
+      mockValidateEntraIdConfiguration.mockReturnValue({ isValid: true });
+      mockCreateEntraIdCredential.mockReturnValue({ getToken: jest.fn() });
+      mockCreateEntraIdAzureOptions.mockReturnValue({
+        azureOpenAIApiInstanceName: 'test-instance',
+        azureOpenAIApiDeploymentName: 'test-deployment',
+        azureOpenAIApiVersion: '2024-12-01-preview',
+        azureOpenAIApiKey: '',
+      });
+
+      process.env.AZURE_OPENAI_USE_ENTRA_ID = 'true';
+      process.env.AZURE_CLIENT_ID = 'test-client-id';
+      process.env.AZURE_CLIENT_SECRET = 'test-client-secret';
+      process.env.AZURE_TENANT_ID = 'test-tenant-id';
+
+      const req = {
+        body: { key: null, endpoint: EModelEndpoint.azureOpenAI, model: 'gpt-4-vision-preview' },
+        user: { id: '123' },
+        app,
+        config: mockAppConfig,
+      };
+      const res = {};
+      const endpointOption = {};
+
+      const result = await initializeClient({ req, res, endpointOption });
+
+      expect(mockShouldUseEntraId).toHaveBeenCalled();
+      expect(mockCreateEntraIdCredential).toHaveBeenCalled();
+      expect(mockCreateEntraIdAzureOptions).toHaveBeenCalled();
+      expect(result.client.options.azureCredential).toBeDefined();
+      expect(result.client.options.azure.azureOpenAIApiKey).toBe('');
+    });
+
+    test('should use Bearer token in headers for serverless with Entra ID', async () => {
+      const mockToken = 'mock-bearer-token';
+      const mockGetToken = jest.fn().mockResolvedValue({ token: mockToken });
+      
+      mockShouldUseEntraId.mockReturnValue(true);
+      mockValidateEntraIdConfiguration.mockReturnValue({ isValid: true });
+      mockCreateEntraIdCredential.mockReturnValue({ getToken: mockGetToken });
+
+      process.env.AZURE_OPENAI_USE_ENTRA_ID = 'true';
+      process.env.AZURE_OPENAI_SERVERLESS = 'true';
+
+      const req = {
+        body: { key: null, endpoint: EModelEndpoint.azureOpenAI, model: 'gpt-4-vision-preview' },
+        user: { id: '123' },
+        app,
+        config: {
+          ...mockAppConfig,
+          endpoints: {
+            ...mockAppConfig.endpoints,
+            azureOpenAI: {
+              ...mockAppConfig.endpoints.azureOpenAI,
+              serverless: true,
+            },
+          },
+        },
+      };
+      const res = {};
+      const endpointOption = {};
+
+      const result = await initializeClient({ req, res, endpointOption });
+
+      expect(mockGetToken).toHaveBeenCalledWith('https://cognitiveservices.azure.com/.default');
+      expect(result.client.options.headers.Authorization).toBe(`Bearer ${mockToken}`);
+    });
+
+    test('should throw error when Entra ID is enabled but configuration is invalid', async () => {
+      mockShouldUseEntraId.mockReturnValue(true);
+      mockValidateEntraIdConfiguration.mockReturnValue({ 
+        isValid: false, 
+        error: 'Missing required environment variables' 
+      });
+
+      process.env.AZURE_OPENAI_USE_ENTRA_ID = 'true';
+      // Don't set required environment variables
+
+      const req = {
+        body: { key: null, endpoint: EModelEndpoint.azureOpenAI, model: 'gpt-4-vision-preview' },
+        user: { id: '123' },
+        app,
+        config: mockAppConfig,
+      };
+      const res = {};
+      const endpointOption = {};
+
+      await expect(initializeClient({ req, res, endpointOption })).rejects.toThrow(
+        /Entra ID authentication configuration error/
+      );
+    });
+
+    test('should use regular Azure authentication when Entra ID is disabled', async () => {
+      mockShouldUseEntraId.mockReturnValue(false);
+
+      process.env.AZURE_OPENAI_USE_ENTRA_ID = 'false';
+      process.env.AZURE_API_KEY = 'test-azure-key';
+
+      const req = {
+        body: { key: null, endpoint: EModelEndpoint.azureOpenAI, model: 'gpt-4-vision-preview' },
+        user: { id: '123' },
+        app,
+        config: mockAppConfig,
+      };
+      const res = {};
+      const endpointOption = {};
+
+      const result = await initializeClient({ req, res, endpointOption });
+
+      expect(mockShouldUseEntraId).toHaveBeenCalled();
+      expect(result.client.options.azureCredential).toBeUndefined();
+      expect(result.client.options.azure.azureOpenAIApiKey).toBe('WESTUS_API_KEY');
+    });
+  });
 });

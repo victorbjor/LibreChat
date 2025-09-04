@@ -9,7 +9,12 @@ const {
 } = require('@librechat/api');
 
 // Import Entra ID utilities separately to avoid import issues
-const { shouldUseEntraId, createEntraIdCredential, createEntraIdAzureOptions, validateEntraIdConfiguration } = require('@librechat/api');
+const {
+  shouldUseEntraId,
+  createEntraIdCredential,
+  createEntraIdAzureOptions,
+  validateEntraIdConfiguration,
+} = require('@librechat/api');
 const { getUserKeyValues, checkUserKeyExpiry } = require('~/server/services/UserService');
 const OpenAIClient = require('~/app/clients/OpenAIClient');
 
@@ -67,6 +72,13 @@ const initializeClient = async ({
   };
 
   const isAzureOpenAI = endpoint === EModelEndpoint.azureOpenAI;
+  console.log(
+    'isAzureOpenAI',
+    isAzureOpenAI,
+    appConfig.endpoints?.[EModelEndpoint.azureOpenAI],
+    endpoint,
+    EModelEndpoint.azureOpenAI,
+  );
   /** @type {false | TAzureConfig} */
   const azureConfig = isAzureOpenAI && appConfig.endpoints?.[EModelEndpoint.azureOpenAI];
   let serverless = false;
@@ -114,7 +126,7 @@ const initializeClient = async ({
       // The credential will be used for authentication instead
       apiKey = ''; // Empty string as placeholder for Entra ID
       clientOptions.azure = !serverless ? createEntraIdAzureOptions(azureOptions) : undefined;
-      
+
       // Add Entra ID credential to client options
       clientOptions.azureCredential = createEntraIdCredential();
     } else {
@@ -131,12 +143,14 @@ const initializeClient = async ({
       if (!clientOptions.headers) {
         clientOptions.headers = {};
       }
-      
+
       // For serverless, we still need the API key in headers even with Entra ID
       if (shouldUseEntraId()) {
         // For Entra ID with serverless, we need to get a token and use it as the API key
         const credential = createEntraIdCredential();
-        const tokenResponse = await credential.getToken('https://cognitiveservices.azure.com/.default');
+        const tokenResponse = await credential.getToken(
+          'https://cognitiveservices.azure.com/.default',
+        );
         clientOptions.headers['api-key'] = tokenResponse?.token || '';
       } else {
         clientOptions.headers['api-key'] = apiKey;
@@ -150,10 +164,11 @@ const initializeClient = async ({
         throw new Error(`Entra ID authentication configuration error: ${validation.error}`);
       }
 
-      const baseCredentials = userProvidesKey && userValues?.apiKey 
-        ? JSON.parse(userValues.apiKey) 
-        : getAzureCredentials();
-      
+      const baseCredentials =
+        userProvidesKey && userValues?.apiKey
+          ? JSON.parse(userValues.apiKey)
+          : getAzureCredentials();
+
       apiKey = ''; // Empty string as placeholder for Entra ID
       clientOptions.azure = createEntraIdAzureOptions(baseCredentials);
       clientOptions.azureCredential = createEntraIdCredential();

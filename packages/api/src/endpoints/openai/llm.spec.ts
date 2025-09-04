@@ -2,6 +2,12 @@ import { ReasoningEffort, ReasoningSummary, Verbosity } from 'librechat-data-pro
 import type { RequestInit } from 'undici';
 import { getOpenAIConfig } from './llm';
 
+// Mock the shouldUseEntraId function
+jest.mock('~/utils/azure', () => ({
+  shouldUseEntraId: jest.fn(),
+  constructAzureURL: jest.fn(({ baseURL }) => baseURL),
+}));
+
 describe('getOpenAIConfig', () => {
   const mockApiKey = 'test-api-key';
 
@@ -419,6 +425,103 @@ describe('getOpenAIConfig', () => {
         medical: true,
         terminology: 'advanced',
       },
+    });
+  });
+
+  // Entra ID Authentication Tests
+  describe('Entra ID Authentication', () => {
+    const { shouldUseEntraId } = require('~/utils/azure');
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should use Authorization header when Entra ID is enabled', () => {
+      shouldUseEntraId.mockReturnValue(true);
+
+      const azure = {
+        azureOpenAIApiInstanceName: 'test-instance',
+        azureOpenAIApiDeploymentName: 'test-deployment',
+        azureOpenAIApiVersion: '2023-05-15',
+        azureOpenAIApiKey: 'azure-key',
+      };
+
+      const result = getOpenAIConfig('mock-token', { 
+        azure,
+        modelOptions: { useResponsesApi: true }
+      });
+
+      expect(shouldUseEntraId).toHaveBeenCalled();
+      expect(result.configOptions?.defaultHeaders).toEqual({
+        Authorization: 'Bearer mock-token',
+      });
+    });
+
+    it('should use api-key header when Entra ID is disabled', () => {
+      shouldUseEntraId.mockReturnValue(false);
+
+      const azure = {
+        azureOpenAIApiInstanceName: 'test-instance',
+        azureOpenAIApiDeploymentName: 'test-deployment',
+        azureOpenAIApiVersion: '2023-05-15',
+        azureOpenAIApiKey: 'azure-key',
+      };
+
+      const result = getOpenAIConfig('mock-api-key', { 
+        azure,
+        modelOptions: { useResponsesApi: true }
+      });
+
+      expect(shouldUseEntraId).toHaveBeenCalled();
+      expect(result.configOptions?.defaultHeaders).toEqual({
+        'api-key': 'mock-api-key',
+      });
+    });
+
+    it('should handle Entra ID with useResponsesApi', () => {
+      shouldUseEntraId.mockReturnValue(true);
+
+      const azure = {
+        azureOpenAIApiInstanceName: 'test-instance',
+        azureOpenAIApiDeploymentName: 'test-deployment',
+        azureOpenAIApiVersion: '2023-05-15',
+        azureOpenAIApiKey: 'azure-key',
+      };
+
+      const result = getOpenAIConfig('mock-token', { 
+        azure,
+        modelOptions: { useResponsesApi: true }
+      });
+
+      expect(result.configOptions?.defaultHeaders).toEqual({
+        Authorization: 'Bearer mock-token',
+      });
+      expect(result.configOptions?.defaultQuery).toEqual({
+        'api-version': 'preview',
+      });
+    });
+
+    it('should handle regular Azure authentication with useResponsesApi', () => {
+      shouldUseEntraId.mockReturnValue(false);
+
+      const azure = {
+        azureOpenAIApiInstanceName: 'test-instance',
+        azureOpenAIApiDeploymentName: 'test-deployment',
+        azureOpenAIApiVersion: '2023-05-15',
+        azureOpenAIApiKey: 'azure-key',
+      };
+
+      const result = getOpenAIConfig('mock-api-key', { 
+        azure,
+        modelOptions: { useResponsesApi: true }
+      });
+
+      expect(result.configOptions?.defaultHeaders).toEqual({
+        'api-key': 'mock-api-key',
+      });
+      expect(result.configOptions?.defaultQuery).toEqual({
+        'api-version': 'preview',
+      });
     });
   });
 });

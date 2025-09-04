@@ -1,4 +1,9 @@
-import { shouldUseEntraId, createEntraIdCredential, createEntraIdAzureOptions, validateEntraIdConfiguration } from './entraId';
+import {
+  shouldUseEntraId,
+  createEntraIdCredential,
+  createEntraIdAzureOptions,
+  validateEntraIdConfiguration,
+} from './entraId';
 import type { AzureOptions } from '~/types';
 
 // Mock environment variables

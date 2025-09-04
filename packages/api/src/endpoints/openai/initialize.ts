@@ -7,7 +7,11 @@ import type {
 } from '~/types';
 import { createHandleLLMNewToken } from '~/utils/generators';
 import { getAzureCredentials, shouldUseEntraId } from '~/utils/azure';
-import { createEntraIdCredential, createEntraIdAzureOptions, validateEntraIdConfiguration } from '~/utils/entraId';
+import {
+  createEntraIdCredential,
+  createEntraIdAzureOptions,
+  validateEntraIdConfiguration,
+} from '~/utils/entraId';
 import { isUserProvided } from '~/utils/common';
 import { resolveHeaders } from '~/utils/env';
 import { getOpenAIConfig } from './llm';
@@ -111,7 +115,7 @@ export const initializeOpenAI = async ({
       // The credential will be used for authentication instead
       apiKey = ''; // Empty string as placeholder for Entra ID
       clientOptions.azure = !serverless ? createEntraIdAzureOptions(azureOptions) : undefined;
-      
+
       // Add Entra ID credential to client options
       clientOptions.azureCredential = createEntraIdCredential();
     } else {
@@ -128,13 +132,15 @@ export const initializeOpenAI = async ({
       if (!clientOptions.headers) {
         clientOptions.headers = {};
       }
-      
+
       // For serverless, we still need the API key in headers even with Entra ID
       if (shouldUseEntraId()) {
-        // For Entra ID with serverless, we need to get a token and use it as the API key
+        // For Entra ID with serverless, we need to get a token and use it in the Authorization header
         const credential = createEntraIdCredential();
-        const tokenResponse = await credential.getToken('https://cognitiveservices.azure.com/.default');
-        clientOptions.headers['api-key'] = tokenResponse?.token || '';
+        const tokenResponse = await credential.getToken(
+          'https://cognitiveservices.azure.com/.default',
+        );
+        clientOptions.headers['Authorization'] = `Bearer ${tokenResponse?.token || ''}`;
       } else {
         clientOptions.headers['api-key'] = apiKey;
       }
@@ -147,16 +153,19 @@ export const initializeOpenAI = async ({
         throw new Error(`Entra ID authentication configuration error: ${validation.error}`);
       }
 
-      const baseCredentials = userProvidesKey && userValues?.apiKey 
-        ? JSON.parse(userValues.apiKey) 
-        : getAzureCredentials();
-      
+      const baseCredentials =
+        userProvidesKey && userValues?.apiKey
+          ? JSON.parse(userValues.apiKey)
+          : getAzureCredentials();
+
       apiKey = ''; // Empty string as placeholder for Entra ID
       clientOptions.azure = createEntraIdAzureOptions(baseCredentials);
       clientOptions.azureCredential = createEntraIdCredential();
     } else {
       clientOptions.azure =
-        userProvidesKey && userValues?.apiKey ? JSON.parse(userValues.apiKey) : getAzureCredentials();
+        userProvidesKey && userValues?.apiKey
+          ? JSON.parse(userValues.apiKey)
+          : getAzureCredentials();
       apiKey = clientOptions.azure?.azureOpenAIApiKey;
     }
   }

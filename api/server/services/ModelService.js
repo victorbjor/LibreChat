@@ -136,12 +136,13 @@ const fetchOpenAIModels = async (opts, _models = []) => {
   if (opts.assistants && process.env.ASSISTANTS_BASE_URL) {
     reverseProxyUrl = process.env.ASSISTANTS_BASE_URL;
   } else if (opts.azure) {
+    // For Azure OpenAI, use the configured models from environment variable
+    // instead of trying to fetch from API (which requires different auth)
+    if (process.env.AZURE_OPENAI_MODELS) {
+      models = splitAndTrim(process.env.AZURE_OPENAI_MODELS);
+      return models;
+    }
     return models;
-    // const azure = getAzureCredentials();
-    // baseURL = (genAzureChatCompletion(azure))
-    //   .split('/deployments')[0]
-    //   .concat(`/models?api-version=${azure.azureOpenAIApiVersion}`);
-    // apiKey = azureOpenAIApiKey;
   }
 
   if (reverseProxyUrl) {

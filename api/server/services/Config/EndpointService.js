@@ -1,12 +1,12 @@
 const { isUserProvided } = require('@librechat/api');
 const { EModelEndpoint } = require('librechat-data-provider');
 const { generateConfig } = require('~/server/utils/handleText');
+const { shouldUseEntraId } = require('@librechat/api');
 
 const {
   OPENAI_API_KEY: openAIApiKey,
   AZURE_ASSISTANTS_API_KEY: azureAssistantsApiKey,
   ASSISTANTS_API_KEY: assistantsApiKey,
-  AZURE_API_KEY: azureOpenAIApiKey,
   ANTHROPIC_API_KEY: anthropicApiKey,
   CHATGPT_TOKEN: chatGPTToken,
   PLUGINS_USE_AZURE,
@@ -16,6 +16,12 @@ const {
   ASSISTANTS_BASE_URL,
   AZURE_ASSISTANTS_BASE_URL,
 } = process.env ?? {};
+
+let azureOpenAIApiKey = process.env.AZURE_API_KEY;
+
+if (shouldUseEntraId()) {
+  azureOpenAIApiKey = 'entra-id';
+}
 
 const useAzurePlugins = !!PLUGINS_USE_AZURE;
 
